@@ -1,6 +1,6 @@
 import { type MiddlewareHandler } from "hono";
+import { type PayloadToken } from "../../../application";
 import { AuthTokenInvalidoError } from "../../../domain";
-import { type PayloadToken } from "../../../domain/ports/ITokenProvider";
 import { AuthToken } from "../../../domain/value-objects";
 import { crearTokenProviderDesdeEnv } from "../../security/TokenProviderFactory";
 

@@ -1,6 +1,6 @@
 import { type MiddlewareHandler } from "hono";
 import { ErrorDeDominio } from "../../../../shared/domain";
-import { type PayloadToken } from "../../../domain";
+import { type PayloadToken } from "../../../application";
 
 type ContextoConAuth = {
   Variables: {

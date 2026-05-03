@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { ErrorDeDominio } from "./lib/shared/domain";
-import { crearAuthController } from "./lib/auth/infrastructure";
-import { crearUsuarioController } from "./lib/usuarios/infrastructure";
-import { type PayloadToken } from "./lib/auth/domain";
+import { type PayloadToken } from "./lib/auth/application";
+import { crearAuthRouter } from "./lib/auth/infrastructure";
+import { crearUsuarioRouter } from "./lib/usuarios/infrastructure";
 import { type D1DatabaseLike } from "./lib/shared/infrastructure";
 
 type AppBindings = {
@@ -21,18 +21,27 @@ type AppVariables = {
 const app = new Hono<{ Bindings: AppBindings; Variables: AppVariables }>();
 
 app.get("/health", (c) => c.json({ status: "ok", service: "alvas-api" }));
-app.route("/usuarios", crearUsuarioController());
-app.route("/auth", crearAuthController());
+app.route("/usuarios", crearUsuarioRouter());
+app.route("/auth", crearAuthRouter());
 
 app.onError((error, c) => {
   if (error instanceof ErrorDeDominio) {
+    const status =
+      error.codigo === "USUARIO_YA_EXISTE"
+        ? 409
+        : error.codigo === "AUTH_TOKEN_INVALIDO" ||
+            error.codigo === "REFRESH_TOKEN_INVALIDO" ||
+            error.codigo === "CREDENCIALES_INVALIDAS"
+          ? 401
+          : 400;
+
     return c.json(
       {
         success: false,
         message: error.message,
         code: error.codigo,
       },
-      400,
+      status,
     );
   }
 

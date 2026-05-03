@@ -1,41 +1,53 @@
-import { type CasoDeUso } from "../../../shared";
+import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
+import { ErrorDeDominio } from "../../../shared/domain";
 import { IdUsuario, type IUsuarioRepository } from "../../../usuarios";
-import { CredencialesInvalidasError, RefreshToken, type ITokenProvider } from "../../domain";
+import { CredencialesInvalidasError, RefreshToken } from "../../domain";
 import { type SesionAutenticadaDTO } from "../dto";
+import { type ITokenProvider } from "../ports";
 
 export type RenovarSesionInput = {
   refreshToken: string;
 };
 
-export class RenovarSesionUseCase implements CasoDeUso<RenovarSesionInput, SesionAutenticadaDTO> {
+export class RenovarSesionUseCase
+  implements CasoDeUso<RenovarSesionInput, Resultado<SesionAutenticadaDTO, ErrorDeDominio>>
+{
   constructor(
     private readonly usuarioRepository: IUsuarioRepository,
     private readonly tokenProvider: ITokenProvider,
   ) {}
 
-  async ejecutar(input: RenovarSesionInput): Promise<SesionAutenticadaDTO> {
-    const refreshToken = new RefreshToken(input.refreshToken);
-    const payloadRefresh = await this.tokenProvider.validarRefreshToken(refreshToken);
-    const usuario = await this.usuarioRepository.obtenerPorId(new IdUsuario(payloadRefresh.idUsuario));
+  async ejecutar(input: RenovarSesionInput): Promise<Resultado<SesionAutenticadaDTO, ErrorDeDominio>> {
+    try {
+      const refreshToken = new RefreshToken(input.refreshToken);
+      const payloadRefresh = await this.tokenProvider.validarRefreshToken(refreshToken);
+      const usuario = await this.usuarioRepository.obtenerPorId(new IdUsuario(payloadRefresh.idUsuario));
 
-    if (!usuario || usuario.estado.estaDeshabilitado()) {
-      throw new CredencialesInvalidasError();
+      if (!usuario || usuario.estado.estaDeshabilitado()) {
+        return resultadoFallido(new CredencialesInvalidasError());
+      }
+
+      const payload = {
+        idUsuario: usuario.id.valor,
+        rol: usuario.rol.valor,
+      };
+      const authToken = await this.tokenProvider.generarAuthToken(payload);
+      const nuevoRefreshToken = await this.tokenProvider.generarRefreshToken(payload);
+
+      return resultadoExitoso({
+        authToken: authToken.valor,
+        refreshToken: nuevoRefreshToken.valor,
+        usuario: {
+          id: payload.idUsuario,
+          rol: payload.rol,
+        },
+      });
+    } catch (error) {
+      if (error instanceof ErrorDeDominio) {
+        return resultadoFallido(error);
+      }
+
+      throw error;
     }
-
-    const payload = {
-      idUsuario: usuario.id.valor,
-      rol: usuario.rol.valor,
-    };
-    const authToken = await this.tokenProvider.generarAuthToken(payload);
-    const nuevoRefreshToken = await this.tokenProvider.generarRefreshToken(payload);
-
-    return {
-      authToken: authToken.valor,
-      refreshToken: nuevoRefreshToken.valor,
-      usuario: {
-        id: payload.idUsuario,
-        rol: payload.rol,
-      },
-    };
   }
 }

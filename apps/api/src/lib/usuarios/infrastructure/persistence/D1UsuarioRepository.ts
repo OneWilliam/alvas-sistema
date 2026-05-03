@@ -1,15 +1,9 @@
 import { type D1DatabaseLike } from "../../../shared/infrastructure";
 import { Usuario } from "../../domain/entities";
-import { type IUsuarioRepository } from "../../domain/ports";
+import { type IUsuarioRepository } from "../../application/ports";
 import { EstadoUsuario, IdUsuario } from "../../domain/value-objects";
 import { asegurarEsquemaUsuarios } from "./schema";
-
-type UsuarioRow = {
-  id: string;
-  hash_clave: string;
-  rol: string;
-  estado: string;
-};
+import { UsuarioMapper, type UsuarioPersistenciaRow } from "./UsuarioMapper";
 
 export class D1UsuarioRepository implements IUsuarioRepository {
   constructor(private readonly db: D1DatabaseLike) {}
@@ -18,20 +12,17 @@ export class D1UsuarioRepository implements IUsuarioRepository {
     await asegurarEsquemaUsuarios(this.db);
 
     const row = await this.db
-      .prepare("SELECT id, hash_clave, rol, estado FROM usuarios WHERE id = ?1")
+      .prepare(
+        "SELECT id, nombre, hash_clave, rol, estado, creado_en, actualizado_en FROM usuarios WHERE id = ?1",
+      )
       .bind(id.valor)
-      .first<UsuarioRow>();
+      .first<UsuarioPersistenciaRow>();
 
     if (!row) {
       return null;
     }
 
-    return Usuario.crear({
-      id: row.id,
-      hashClave: row.hash_clave,
-      rol: row.rol,
-      estado: row.estado,
-    });
+    return UsuarioMapper.aDominio(row);
   }
 
   async existePorId(id: IdUsuario): Promise<boolean> {
@@ -47,13 +38,15 @@ export class D1UsuarioRepository implements IUsuarioRepository {
 
   async guardar(usuario: Usuario): Promise<void> {
     await asegurarEsquemaUsuarios(this.db);
+    const usuarioPersistencia = UsuarioMapper.aPersistencia(usuario);
 
     await this.db
       .prepare(
         `
-          INSERT INTO usuarios (id, hash_clave, rol, estado, creado_en, actualizado_en)
-          VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+          INSERT INTO usuarios (id, nombre, hash_clave, rol, estado, creado_en, actualizado_en)
+          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
           ON CONFLICT(id) DO UPDATE SET
+            nombre = excluded.nombre,
             hash_clave = excluded.hash_clave,
             rol = excluded.rol,
             estado = excluded.estado,
@@ -61,12 +54,13 @@ export class D1UsuarioRepository implements IUsuarioRepository {
         `,
       )
       .bind(
-        usuario.id.valor,
-        usuario.hashClave,
-        usuario.rol.valor,
-        usuario.estado.valor,
-        usuario.creadoEn.toISOString(),
-        usuario.actualizadoEn.toISOString(),
+        usuarioPersistencia.id,
+        usuarioPersistencia.nombre,
+        usuarioPersistencia.hash_clave,
+        usuarioPersistencia.rol,
+        usuarioPersistencia.estado,
+        usuarioPersistencia.creado_en,
+        usuarioPersistencia.actualizado_en,
       )
       .run();
   }
@@ -80,17 +74,12 @@ export class D1UsuarioRepository implements IUsuarioRepository {
     await asegurarEsquemaUsuarios(this.db);
 
     const query = await this.db
-      .prepare("SELECT id, hash_clave, rol, estado FROM usuarios ORDER BY id ASC")
-      .all<UsuarioRow>();
+      .prepare(
+        "SELECT id, nombre, hash_clave, rol, estado, creado_en, actualizado_en FROM usuarios ORDER BY id ASC",
+      )
+      .all<UsuarioPersistenciaRow>();
 
-    return query.results.map((row: UsuarioRow) =>
-      Usuario.crear({
-        id: row.id,
-        hashClave: row.hash_clave,
-        rol: row.rol,
-        estado: row.estado,
-      }),
-    );
+    return query.results.map((row: UsuarioPersistenciaRow) => UsuarioMapper.aDominio(row));
   }
 
   async deshabilitarPorId(id: IdUsuario): Promise<void> {
@@ -126,9 +115,10 @@ export class D1UsuarioRepository implements IUsuarioRepository {
     await this.guardar(usuario);
   }
 
-  async crearUsuario(id: string, hashClave: string, rol: string): Promise<Usuario> {
+  async crearUsuario(id: string, nombre: string, hashClave: string, rol: string): Promise<Usuario> {
     const usuario = Usuario.crear({
       id,
+      nombre,
       hashClave,
       rol,
       estado: EstadoUsuario.activo().valor,

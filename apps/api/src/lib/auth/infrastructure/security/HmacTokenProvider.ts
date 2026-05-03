@@ -1,4 +1,5 @@
-import { AuthTokenInvalidoError, RefreshTokenInvalidoError, type ITokenProvider, type PayloadToken } from "../../domain";
+import { type ITokenProvider, type PayloadToken } from "../../application";
+import { AuthTokenInvalidoError, RefreshTokenInvalidoError } from "../../domain";
 import { AuthToken, RefreshToken } from "../../domain/value-objects";
 
 type TipoToken = "auth" | "refresh";

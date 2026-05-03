@@ -1,5 +1,5 @@
 import { type ValorRolUsuario } from "../../../usuarios";
-import { AuthToken, RefreshToken } from "../value-objects";
+import { AuthToken, RefreshToken } from "../../domain/value-objects";
 
 export type PayloadToken = {
   idUsuario: string;
