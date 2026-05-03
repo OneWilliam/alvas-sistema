@@ -1,7 +1,8 @@
 import { Hono } from "hono";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type D1DatabaseLike } from "../../../shared/infrastructure";
-import { IdUsuario, Usuario, UsuarioYaExisteError } from "../../domain";
+import { UsuarioYaExisteError } from "../../domain";
+import { CrearUsuarioUseCase } from "../../application";
 import { D1UsuarioRepository } from "../persistence/D1UsuarioRepository";
 import { Pbkdf2PasswordHasher } from "../security/Pbkdf2PasswordHasher";
 
@@ -10,44 +11,26 @@ type BindingsUsuarios = {
   AUTH_PEPPER?: string;
 };
 
-type CrearUsuarioRequest = {
-  idUsuario: string;
-  clave: string;
-  rol: string;
-};
-
 export const crearUsuarioController = () => {
   const router = new Hono<{ Bindings: BindingsUsuarios }>();
 
   router.post("/", async (c) => {
     try {
-      const body = await c.req.json<CrearUsuarioRequest>();
+      const body = await c.req.json();
       const repo = new D1UsuarioRepository(c.env.DB);
-      const idUsuario = body.idUsuario.trim();
-      const id = new IdUsuario(idUsuario);
-
       const passwordHasher = new Pbkdf2PasswordHasher(c.env.AUTH_PEPPER);
-      const hashClave = await passwordHasher.hashear(body.clave);
-      const usuario = Usuario.crear({
-        id: id.valor,
-        hashClave,
+      
+      const useCase = new CrearUsuarioUseCase(repo, passwordHasher);
+      const resultado = await useCase.ejecutar({
+        idUsuario: body.idUsuario,
+        clave: body.clave,
         rol: body.rol,
       });
-
-      if (await repo.existePorId(usuario.id)) {
-        throw new UsuarioYaExisteError(usuario.id.valor);
-      }
-
-      await repo.guardar(usuario);
 
       return c.json(
         {
           success: true,
-          data: {
-            id: usuario.id.valor,
-            rol: usuario.rol.valor,
-            estado: usuario.estado.valor,
-          },
+          data: resultado,
         },
         201,
       );
