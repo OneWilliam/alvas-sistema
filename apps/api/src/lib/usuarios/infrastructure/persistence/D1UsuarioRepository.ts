@@ -1,4 +1,4 @@
-import { type D1DatabaseLike } from "../../../shared";
+import { type D1DatabaseLike } from "../../../shared/infrastructure";
 import { Usuario } from "../../domain/entities";
 import { type IUsuarioRepository } from "../../domain/ports";
 import { EstadoUsuario, IdUsuario } from "../../domain/value-objects";
@@ -83,7 +83,7 @@ export class D1UsuarioRepository implements IUsuarioRepository {
       .prepare("SELECT id, hash_clave, rol, estado FROM usuarios ORDER BY id ASC")
       .all<UsuarioRow>();
 
-    return query.results.map((row) =>
+    return query.results.map((row: UsuarioRow) =>
       Usuario.crear({
         id: row.id,
         hashClave: row.hash_clave,

@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 import { ErrorDeDominio } from "./lib/shared/domain";
-import { crearAuthController } from "./lib/auth";
-import { crearUsuarioController } from "./lib/usuarios";
+import { crearAuthController } from "./lib/auth/infrastructure";
+import { crearUsuarioController } from "./lib/usuarios/infrastructure";
 import { type PayloadToken } from "./lib/auth/domain";
-import { type D1DatabaseLike } from "./lib/shared";
+import { type D1DatabaseLike } from "./lib/shared/infrastructure";
 
 type AppBindings = {
   DB: D1DatabaseLike;

@@ -1,12 +1,12 @@
 import { Hono } from "hono";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type D1DatabaseLike } from "../../../shared/infrastructure";
-import { D1UsuarioRepository } from "../../../usuarios";
+import { D1UsuarioRepository } from "../../../usuarios/infrastructure";
 import { IniciarSesionUseCase, RenovarSesionUseCase } from "../../application";
 import { AuthTokenInvalidoError, CredencialesInvalidasError } from "../../domain";
 import { verifyTokenMiddleware } from "./middlewares/VerifyTokenMiddleware";
 import { crearTokenProviderDesdeEnv } from "../security/TokenProviderFactory";
-import { Pbkdf2PasswordHasher } from "../../../usuarios/infrastructure/security/Pbkdf2PasswordHasher";
+import { Pbkdf2PasswordHasher } from "../../../usuarios/infrastructure";
 
 type AuthBindings = {
   DB: D1DatabaseLike;
