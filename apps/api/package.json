@@ -4,15 +4,19 @@
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
-    "test": "bun test"
+    "test": "bun test",
+    "build": "echo 'No build step needed for Wrangler'"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@cloudflare/workers-types": "^4.20260503.1",
+    "@types/bun": "latest",
+    "@types/uuid": "^11.0.0"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
-    "hono": "^4.12.15"
+    "hono": "^4.12.15",
+    "uuid": "^14.0.0"
   }
 }
