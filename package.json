@@ -9,6 +9,9 @@
   "scripts": {
     "dev:api": "bun --cwd apps/api dev",
     "dev:web": "bun --cwd apps/web dev",
+    "db:generate": "bunx drizzle-kit generate",
+    "db:migrate:local": "bun --cwd apps/api wrangler d1 migrations apply alvas_db --local",
+    "db:migrate:remote": "bun --cwd apps/api wrangler d1 migrations apply alvas_db --remote",
     "test": "bun test",
     "typecheck": "tsc --noEmit -p apps/api/tsconfig.json && tsc --noEmit -p apps/web/tsconfig.json && tsc --noEmit -p packages/shared-types/tsconfig.json && tsc --noEmit -p packages/shared-utils/tsconfig.json",
     "format": "prettier --write .",

@@ -24,7 +24,7 @@ export class UsuarioMapper {
     return {
       id: usuario.id.valor,
       nombre: usuario.nombre.valor,
-      hashClave: usuario.hashClave,
+      hashClave: usuario.hashClave.valor,
       rol: usuario.rol.valor,
       estado: usuario.estado.valor,
       creadoEn: usuario.creadoEn.toISOString(),
