@@ -1,6 +1,7 @@
 import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain";
-import { type IPasswordHasher, type IUsuarioRepository } from "../ports";
+import { type IPasswordHasher } from "../ports";
+import { type IUsuarioRepository } from "../../domain/ports";
 import { Usuario } from "../../domain/entities";
 import { IdUsuario } from "../../domain/value-objects";
 import { UsuarioYaExisteError } from "../../domain/errors";
@@ -25,7 +26,7 @@ export class CrearUsuarioUseCase implements CasoDeUso<CrearUsuarioDTO, Resultado
       const usuario = Usuario.crear({
         id: idUsuario.valor,
         nombre: dto.nombre,
-        hashClave,
+        hashClave: hashClave.valor,
         rol: dto.rol,
       });
 

@@ -1,6 +1,7 @@
 import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain";
-import { IdUsuario, type IPasswordHasher, type IUsuarioRepository } from "../../../usuarios";
+import { IdUsuario, type IPasswordHasher } from "../../../usuarios";
+import { type IUsuarioRepository } from "../../../usuarios/domain/ports";
 import { CredencialesInvalidasError } from "../../domain";
 import { type SesionAutenticadaDTO } from "../dto";
 import { type ITokenProvider } from "../ports";

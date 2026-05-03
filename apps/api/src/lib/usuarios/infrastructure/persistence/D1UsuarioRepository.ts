@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import { type D1DatabaseLike } from "../../../shared/infrastructure";
 import { Usuario } from "../../domain/entities";
-import { type IUsuarioRepository } from "../../application/ports";
-import { EstadoUsuario, IdUsuario } from "../../domain/value-objects";
+import { type IUsuarioRepository } from "../../domain/ports";
+import { IdUsuario } from "../../domain/value-objects";
 import { obtenerDb } from "./drizzle";
 import { usuariosTable, type UsuarioRow } from "./schema";
 import { UsuarioMapper } from "./UsuarioMapper";
@@ -149,24 +149,6 @@ export class D1UsuarioRepository implements IUsuarioRepository {
       await this.guardar(usuario);
     } catch (error) {
       console.error(`Error actualizarHashClave(${id.valor}):`, error);
-      throw error;
-    }
-  }
-
-  async crearUsuario(id: string, nombre: string, hashClave: string, rol: string): Promise<Usuario> {
-    try {
-      const usuario = Usuario.crear({
-        id,
-        nombre,
-        hashClave,
-        rol,
-        estado: EstadoUsuario.activo().valor,
-      });
-
-      await this.guardar(usuario);
-      return usuario;
-    } catch (error) {
-      console.error(`Error crearUsuario(${id}):`, error);
       throw error;
     }
   }
