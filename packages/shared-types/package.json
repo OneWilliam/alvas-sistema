@@ -1,0 +1,6 @@
+{
+  "name": "@alvas/shared-types",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts"
+}
