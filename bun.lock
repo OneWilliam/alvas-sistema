@@ -29,6 +29,7 @@
         "uuid": "^14.0.0",
       },
       "devDependencies": {
+        "@cloudflare/workers-types": "^4.20260503.1",
         "@types/bun": "latest",
         "@types/uuid": "^11.0.0",
       },
@@ -72,6 +73,8 @@
     "@cloudflare/workerd-linux-arm64": ["@cloudflare/workerd-linux-arm64@1.20260430.1", "", { "os": "linux", "cpu": "arm64" }, "sha512-hMdapNAzNQZDXGGkg4Slydc3fRJP5FUZLJVVcZCW/+imhhJro9Z1rv5n/wfR+txKoSWhTYR8eOp8Pyi2bzLzlw=="],
 
     "@cloudflare/workerd-windows-64": ["@cloudflare/workerd-windows-64@1.20260430.1", "", { "os": "win32", "cpu": "x64" }, "sha512-jS3ffixjb5USOwz4frw4WzCz0HrjVxkgyU3WiYb06N7hBAfN6eOrveAJ4QRef0+suK4V1vQFoB1oKdRBsXe9Dw=="],
+
+    "@cloudflare/workers-types": ["@cloudflare/workers-types@4.20260503.1", "", {}, "sha512-8VKtafR4fNMtddutOnam3yq3AQvrl9bzuMio3B3AEAfrdx7xaaDV0Oyxz54P07lODwX0jydukGLC1rpDdYXAAA=="],
 
     "@commitlint/cli": ["@commitlint/cli@20.5.3", "", { "dependencies": { "@commitlint/format": "^20.5.0", "@commitlint/lint": "^20.5.3", "@commitlint/load": "^20.5.3", "@commitlint/read": "^20.5.0", "@commitlint/types": "^20.5.0", "tinyexec": "^1.0.0", "yargs": "^17.0.0" }, "bin": { "commitlint": "./cli.js" } }, "sha512-OJdL0EXWD5y9LPa0nr/geOwzaS8BsdaybKkcloB0JgsguGxNv2R+hC2FTPqrAcprg35zF33KOQerY0x8W1aesA=="],
 
