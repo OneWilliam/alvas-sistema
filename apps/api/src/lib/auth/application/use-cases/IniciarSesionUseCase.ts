@@ -1,6 +1,7 @@
 import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain";
-import { IdUsuario, type IPasswordHasher, type IUsuarioRepository } from "../../../usuarios";
+import { IdUsuario, type IPasswordHasher } from "../../../usuarios";
+import { type IUsuarioRepository } from "../../../usuarios/domain/ports";
 import { CredencialesInvalidasError } from "../../domain";
 import { type SesionAutenticadaDTO } from "../dto";
 import { type ITokenProvider } from "../ports";
@@ -34,7 +35,7 @@ export class IniciarSesionUseCase
         return resultadoFallido(new CredencialesInvalidasError());
       }
 
-      const coincideClave = await this.passwordHasher.comparar(clave, usuario.hashClave);
+      const coincideClave = await this.passwordHasher.comparar(clave, usuario.hashClave.valor);
 
       if (!coincideClave) {
         return resultadoFallido(new CredencialesInvalidasError());

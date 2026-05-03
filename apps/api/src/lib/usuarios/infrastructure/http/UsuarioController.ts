@@ -17,28 +17,40 @@ type ContextoUsuarios = Context<{ Bindings: BindingsUsuarios }>;
 
 export class UsuarioController {
   async crear(c: ContextoUsuarios): Promise<Response> {
-    const body = await c.req.json<CrearUsuarioDTO>();
-    const repo = new D1UsuarioRepository(c.env.DB);
-    const passwordHasher = new Pbkdf2PasswordHasher(c.env.AUTH_PEPPER);
-    const useCase = new CrearUsuarioUseCase(repo, passwordHasher);
-    const resultado = await useCase.ejecutar({
-      idUsuario: body.idUsuario,
-      nombre: body.nombre,
-      clave: body.clave,
-      rol: body.rol,
-    });
+    try {
+      const body = await c.req.json<CrearUsuarioDTO>();
+      const repo = new D1UsuarioRepository(c.env.DB);
+      const passwordHasher = new Pbkdf2PasswordHasher(c.env.AUTH_PEPPER);
+      const useCase = new CrearUsuarioUseCase(repo, passwordHasher);
+      const resultado = await useCase.ejecutar({
+        idUsuario: body.idUsuario,
+        nombre: body.nombre,
+        clave: body.clave,
+        rol: body.rol,
+      });
 
-    if (!resultado.esExito) {
-      return this.responderErrorDeDominio(resultado.error, c);
+      if (!resultado.esExito) {
+        return this.responderErrorDeDominio(resultado.error, c);
+      }
+
+      return c.json(
+        {
+          success: true,
+          data: UsuarioMapper.aRespuesta(resultado.valor),
+        },
+        201,
+      );
+    } catch (error) {
+      console.error("Error inesperado en UsuarioController.crear:", error);
+      return c.json(
+        {
+          success: false,
+          message: "Error interno del servidor",
+          error: error instanceof Error ? error.message : String(error),
+        },
+        500,
+      );
     }
-
-    return c.json(
-      {
-        success: true,
-        data: UsuarioMapper.aRespuesta(resultado.valor),
-      },
-      201,
-    );
   }
 
   private responderErrorDeDominio(error: ErrorDeDominio, c: ContextoUsuarios): Response {

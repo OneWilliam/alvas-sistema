@@ -1,11 +1,11 @@
 import { ErrorDeValidacion } from "../../../shared/domain";
-import { HashClaveUsuarioInvalidaError, UsuarioYaDeshabilitadoError } from "../errors";
-import { EstadoUsuario, IdUsuario, Nombre, Rol } from "../value-objects";
+import { UsuarioYaDeshabilitadoError } from "../errors";
+import { EstadoUsuario, IdUsuario, Nombre, Rol, HashClave } from "../value-objects";
 
 type PropsUsuario = {
   id: IdUsuario;
   nombre: Nombre;
-  hashClave: string;
+  hashClave: HashClave;
   rol: Rol;
   estado: EstadoUsuario;
   creadoEn: Date;
@@ -33,7 +33,7 @@ type ReconstituirUsuarioParams = {
 export class Usuario {
   private readonly idInterno: IdUsuario;
   private readonly nombreInterno: Nombre;
-  private hashClaveInterna: string;
+  private hashClaveInterna: HashClave;
   private rolInterno: Rol;
   private estadoInterno: EstadoUsuario;
   private readonly creadoEnInterno: Date;
@@ -51,12 +51,11 @@ export class Usuario {
 
   static crear(params: CrearUsuarioParams): Usuario {
     const ahora = new Date();
-    const hashClave = this.validarYNormalizarHash(params.hashClave);
 
     return new Usuario({
       id: new IdUsuario(params.id),
       nombre: new Nombre(params.nombre),
-      hashClave,
+      hashClave: new HashClave(params.hashClave),
       rol: new Rol(params.rol),
       estado: params.estado ? new EstadoUsuario(params.estado) : EstadoUsuario.activo(),
       creadoEn: ahora,
@@ -75,7 +74,7 @@ export class Usuario {
     return new Usuario({
       id: new IdUsuario(params.id),
       nombre: new Nombre(params.nombre),
-      hashClave: this.validarYNormalizarHash(params.hashClave),
+      hashClave: new HashClave(params.hashClave),
       rol: new Rol(params.rol),
       estado: new EstadoUsuario(params.estado),
       creadoEn,
@@ -95,7 +94,7 @@ export class Usuario {
     return this.rolInterno;
   }
 
-  get hashClave(): string {
+  get hashClave(): HashClave {
     return this.hashClaveInterna;
   }
 
@@ -117,9 +116,7 @@ export class Usuario {
   }
 
   cambiarHashClave(nuevoHashClave: string): void {
-    const hashClaveNormalizado = Usuario.validarYNormalizarHash(nuevoHashClave);
-
-    this.hashClaveInterna = hashClaveNormalizado;
+    this.hashClaveInterna = new HashClave(nuevoHashClave);
     this.actualizadoEnInterno = new Date();
   }
 
@@ -130,15 +127,5 @@ export class Usuario {
 
     this.estadoInterno = EstadoUsuario.deshabilitado();
     this.actualizadoEnInterno = new Date();
-  }
-
-  private static validarYNormalizarHash(hashClave: string): string {
-    const hashNormalizado = hashClave.trim();
-
-    if (hashNormalizado.length < 10) {
-      throw new HashClaveUsuarioInvalidaError();
-    }
-
-    return hashNormalizado;
   }
 }

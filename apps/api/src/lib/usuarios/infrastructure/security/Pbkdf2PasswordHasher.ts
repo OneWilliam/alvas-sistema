@@ -1,5 +1,6 @@
 import { ErrorDeValidacion } from "../../../shared/domain";
 import { type IPasswordHasher } from "../../application/ports";
+import { HashClave } from "../../domain/value-objects";
 
 const ITERACIONES_PBKDF2 = 120_000;
 const LARGO_HASH_BYTES = 32;
@@ -37,7 +38,7 @@ const compararSeguro = (a: string, b: string): boolean => {
 export class Pbkdf2PasswordHasher implements IPasswordHasher {
   constructor(private readonly pepper: string = "") {}
 
-  async hashear(clavePlana: string): Promise<string> {
+  async hashear(clavePlana: string): Promise<HashClave> {
     const claveNormalizada = clavePlana.trim();
 
     if (claveNormalizada.length < 8) {
@@ -47,7 +48,7 @@ export class Pbkdf2PasswordHasher implements IPasswordHasher {
     const salt = crypto.getRandomValues(new Uint8Array(LARGO_SALT_BYTES));
     const hash = await this.derivarHash(claveNormalizada, salt, ITERACIONES_PBKDF2);
 
-    return `pbkdf2$${ITERACIONES_PBKDF2}$${aBase64Url(salt)}$${aBase64Url(hash)}`;
+    return new HashClave(`pbkdf2$${ITERACIONES_PBKDF2}$${aBase64Url(salt)}$${aBase64Url(hash)}`);
   }
 
   async comparar(clavePlana: string, hashGuardado: string): Promise<boolean> {
