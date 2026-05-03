@@ -1,16 +1,40 @@
 name = "alvas-api"
-main = "src/main.ts"
 compatibility_date = "2024-04-25"
+main = "src/main.ts"
 
-[[d1_databases]]
-binding = "DB"
-database_name = "alvas_db"
-database_id = "tu-id-de-d1-aqui" # Se genera al crear la DB en Cloudflare
-migrations_dir = "drizzle"
-
+# --- ENTORNOS Y VARIABLES GLOBALES ---
 [vars]
-AUTH_SECRET = "cambiar-esto-en-cloudflare"
-AUTH_REFRESH_SECRET = "cambiar-refresh-secret"
 AUTH_TOKEN_TTL_SEGUNDOS = "900"
 REFRESH_TOKEN_TTL_SEGUNDOS = "604800"
-AUTH_PEPPER = "cambiar-pepper"
+
+# --- ENTORNO POR DEFECTO (Development / Local) ---
+[[d1_databases]]
+binding = "DB"
+database_name = "alvas-dev"
+database_id = "3e42be52-b6b0-4519-a090-4aea158cd2b6"
+migrations_dir = "drizzle"
+
+# --- ENTORNO TESTING ---
+
+[env.testing]
+[env.testing.vars]
+AUTH_TOKEN_TTL_SEGUNDOS = "900"
+REFRESH_TOKEN_TTL_SEGUNDOS = "604800"
+
+[[env.testing.d1_databases]]
+binding = "DB"
+database_name = "alvas-test"
+database_id = "a047b705-a4b8-4412-b8f7-7b9ef66f6e19"
+migrations_dir = "drizzle"
+
+# --- ENTORNO PRODUCCIÓN ---
+[env.production]
+[env.production.vars]
+AUTH_TOKEN_TTL_SEGUNDOS = "900"
+REFRESH_TOKEN_TTL_SEGUNDOS = "604800"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "alvas-main"
+database_id = "ONE_TWO-THREE-FOUR-FIVE_NVM"
+migrations_dir = "drizzle"
