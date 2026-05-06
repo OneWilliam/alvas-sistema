@@ -1,52 +1,27 @@
-# api
+# Alvas API - Documentación Técnica
 
-Backend base de ALVAS para evolucionar por modulos DDD + Hexagonal.
+## Arquitectura
+Este servicio sigue una arquitectura **Hexagonal (Ports & Adapters)** combinada con **Domain-Driven Design (DDD)**.
 
-## Comandos
+### Reglas de Dependencia
+1. **Domain**: Es el núcleo. **No depende de nadie**. Contiene entidades, value objects, y puertos (interfaces).
+2. **Application**: Contiene los casos de uso. Depende únicamente de `domain` y de los puertos definidos en otros bounded contexts.
+3. **Infrastructure**: Implementa los puertos definidos en `domain` o `application`. Es el único lugar donde vive la lógica de frameworks (Hono, Drizzle, etc.).
 
-```bash
-bun install
-bun run dev
-bun test
-```
+### Estructura de Módulos (Bounded Contexts)
+Cada módulo (citas, leads, propiedades, usuarios, auth) sigue esta estructura:
+- `/domain`: Entidades, VOs, Errores específicos, Puertos.
+- `/application`: Casos de uso, DTOs.
+- `/infrastructure`: Adaptadores, Persistencia (Drizzle), HTTP (Controladores/Routers).
 
-## Endpoints base
+### Comandos Esenciales
 
-- `GET /health`
-- `POST /usuarios` crea usuario base para pruebas
-- `POST /auth/login`
-- `POST /auth/refresh`
-- `GET /auth/me` (requiere bearer token)
+| Comando | Descripción |
+| :--- | :--- |
+| `bun run dev` | Inicia el entorno de desarrollo (Wrangler). |
+| `bun run db:generate` | Genera archivos de migración SQL basados en el esquema. |
+| `bun run db:migrate:local` | Aplica migraciones a la base de datos local (D1). |
+| `bun test` | Ejecuta los tests unitarios y de integración. |
 
-## Flujo rapido de prueba local
-
-Crear usuario:
-
-```bash
-curl -X POST http://127.0.0.1:8787/usuarios ^
-  -H "Content-Type: application/json" ^
-  -d "{\"idUsuario\":\"admin01\",\"clave\":\"ClaveSegura123\",\"rol\":\"ADMIN\"}"
-```
-
-Login:
-
-```bash
-curl -X POST http://127.0.0.1:8787/auth/login ^
-  -H "Content-Type: application/json" ^
-  -d "{\"idUsuario\":\"admin01\",\"clave\":\"ClaveSegura123\"}"
-```
-
-Refresh:
-
-```bash
-curl -X POST http://127.0.0.1:8787/auth/refresh ^
-  -H "Content-Type: application/json" ^
-  -d "{\"refreshToken\":\"<token-refresh>\"}"
-```
-
-Perfil:
-
-```bash
-curl http://127.0.0.1:8787/auth/me ^
-  -H "Authorization: Bearer <token-auth>"
-```
+## Gestión de Errores
+Se utiliza `ErrorDeDominio` como clase base. Cada contexto define su propia subclase (ej. `LeadError`, `PropiedadError`) para garantizar trazabilidad y contexto.

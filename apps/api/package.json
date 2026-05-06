@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "hono": "^4.12.15",
-    "uuid": "^14.0.0"
+    "uuid": "^14.0.0",
+    "drizzle-orm": "^0.45.2"
   }
 }

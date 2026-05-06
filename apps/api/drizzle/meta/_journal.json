@@ -15,6 +15,13 @@
       "when": 1777834336872,
       "tag": "0001_fancy_zodiak",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1778048580036,
+      "tag": "0002_massive_molten_man",
+      "breakpoints": true
     }
   ]
 }

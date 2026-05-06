@@ -6,7 +6,6 @@
       "name": "alvas-sistema",
       "dependencies": {
         "drizzle-kit": "^0.31.10",
-        "drizzle-orm": "^0.45.2",
       },
       "devDependencies": {
         "@commitlint/cli": "^20.1.0",
@@ -25,6 +24,7 @@
     "apps/api": {
       "name": "@alvas/api",
       "dependencies": {
+        "drizzle-orm": "^0.45.2",
         "hono": "^4.12.15",
         "uuid": "^14.0.0",
       },
