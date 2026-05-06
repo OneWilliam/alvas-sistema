@@ -4,6 +4,8 @@ import { type PayloadToken } from "./lib/auth/application";
 import { crearAuthRouter } from "./lib/auth/infrastructure";
 import { crearUsuarioRouter } from "./lib/usuarios/infrastructure";
 import { citaRouter } from "./lib/citas/infrastructure";
+import { leadRouter } from "./lib/leads/infrastructure";
+import { propiedadRouter } from "./lib/propiedades/infrastructure";
 import { type D1DatabaseLike } from "./lib/shared/infrastructure";
 
 type AppBindings = {
@@ -25,6 +27,8 @@ app.get("/health", (c) => c.json({ status: "ok", service: "alvas-api" }));
 app.route("/usuarios", crearUsuarioRouter());
 app.route("/auth", crearAuthRouter());
 app.route("/citas", citaRouter);
+app.route("/leads", leadRouter);
+app.route("/propiedades", propiedadRouter);
 
 app.onError((error, c) => {
   if (error instanceof ErrorDeDominio) {

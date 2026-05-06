@@ -1,4 +1,4 @@
-import { type IdPropiedad } from "../value-objects/IdPropiedad";
+import { idPropiedad, type IdPropiedad } from "../value-objects";
 import { type IdUsuarioRef } from "../value-objects";
 
 type PropsPropiedad = {
@@ -14,8 +14,31 @@ type PropsPropiedad = {
 export class Propiedad {
   private props: PropsPropiedad;
 
-  constructor(props: PropsPropiedad) {
+  private constructor(props: PropsPropiedad) {
     this.props = props;
+  }
+
+  static crear(params: {
+    id: string;
+    titulo: string;
+    descripcion: string;
+    precio: number;
+    idAsesor: IdUsuarioRef;
+  }): Propiedad {
+    const ahora = new Date();
+    return new Propiedad({
+      id: idPropiedad(params.id),
+      titulo: params.titulo,
+      descripcion: params.descripcion,
+      precio: params.precio,
+      idAsesor: params.idAsesor,
+      creadoEn: ahora,
+      actualizadoEn: ahora,
+    });
+  }
+
+  static reconstituir(props: PropsPropiedad): Propiedad {
+    return new Propiedad(props);
   }
 
   get id(): IdPropiedad { return this.props.id; }
@@ -23,4 +46,6 @@ export class Propiedad {
   get descripcion(): string { return this.props.descripcion; }
   get precio(): number { return this.props.precio; }
   get idAsesor(): IdUsuarioRef { return this.props.idAsesor; }
+  get creadoEn(): Date { return this.props.creadoEn; }
+  get actualizadoEn(): Date { return this.props.actualizadoEn; }
 }
