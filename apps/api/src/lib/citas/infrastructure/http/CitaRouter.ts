@@ -1,11 +1,15 @@
 import { Hono } from "hono";
 import { CitaController, type BindingsCitas } from "./CitaController";
 import { verifyTokenMiddleware } from "../../../auth/infrastructure/http/middlewares/VerifyTokenMiddleware";
-import { type PayloadToken } from "../../../auth/application";
+
+type SesionActiva = {
+  idUsuario: string;
+  rol: string;
+};
 
 const citaRouter = new Hono<{ 
   Bindings: BindingsCitas;
-  Variables: { authPayload: PayloadToken };
+  Variables: { authPayload: SesionActiva };
 }>();
 const controller = new CitaController();
 

@@ -3,7 +3,7 @@ import { type D1DatabaseLike } from "../../../shared/infrastructure";
 import { Usuario } from "../../domain/entities";
 import { type IUsuarioRepository } from "../../domain/ports";
 import { IdUsuario } from "../../domain/value-objects";
-import { obtenerDb } from "./drizzle";
+import { obtenerDb } from "../../../shared/infrastructure/persistence/drizzle";
 import { usuariosTable, type UsuarioRow } from "./schema";
 import { UsuarioMapper } from "./UsuarioMapper";
 

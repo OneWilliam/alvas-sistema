@@ -6,14 +6,18 @@ import { D1CitaRepository } from "../persistence/D1CitaRepository";
 import { CitaMapper } from "../persistence/CitaMapper";
 import { UuidGeneradorId } from "../../../shared/infrastructure/security/UuidGeneradorId";
 import { type CrearCitaDTO } from "../../application/dto/CitaDTOs";
-import { type PayloadToken } from "../../../auth/application";
 
 export type BindingsCitas = {
   DB: D1DatabaseLike;
 };
 
+type SesionActiva = {
+  idUsuario: string;
+  rol: string;
+};
+
 type AppVariables = {
-  authPayload: PayloadToken;
+  authPayload: SesionActiva;
 };
 
 type ContextoCitas = Context<{ Bindings: BindingsCitas; Variables: AppVariables }>;

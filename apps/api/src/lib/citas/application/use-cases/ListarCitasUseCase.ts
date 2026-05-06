@@ -2,12 +2,13 @@ import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } fr
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type ICitaRepository } from "../../domain/ports";
 import { Cita } from "../../domain/entities";
-import { IdUsuario, type ValorRolUsuario } from "../../../usuarios/domain/value-objects";
+import { idUsuarioRef } from "../../domain/value-objects/IdUsuarioRef";
+import { PoliticaDeCita } from "../../domain/services/PoliticaDeCita";
 
 export type ListarCitasInput = {
   usuarioAutenticado: {
     id: string;
-    rol: ValorRolUsuario;
+    rol: string;
   };
 };
 
@@ -19,11 +20,10 @@ export class ListarCitasUseCase implements CasoDeUso<ListarCitasInput, Resultado
       const { usuarioAutenticado } = input;
       let citas: Cita[];
 
-      if (usuarioAutenticado.rol === "ADMIN") {
+      if (PoliticaDeCita.puedeVerTodasLasCitas(usuarioAutenticado.rol)) {
         citas = await this.citaRepository.listarTodos();
       } else {
-        const idUsuario = new IdUsuario(usuarioAutenticado.id);
-        citas = await this.citaRepository.obtenerPorUsuario(idUsuario);
+        citas = await this.citaRepository.obtenerPorUsuario(idUsuarioRef(usuarioAutenticado.id));
       }
 
       return resultadoExitoso(citas);

@@ -2,15 +2,16 @@ import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } fr
 import { ErrorDeDominio, ErrorDeValidacion } from "../../../shared/domain";
 import { type ICitaRepository } from "../../domain/ports";
 import { Cita } from "../../domain/entities";
-import { IdUsuario, type ValorRolUsuario } from "../../../usuarios/domain/value-objects";
+import { type IdUsuarioRef, idUsuarioRef } from "../../domain/value-objects/IdUsuarioRef";
 import { type CrearCitaDTO } from "../dto/CitaDTOs";
 import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
+import { PoliticaDeCita } from "../../domain/services/PoliticaDeCita";
 
 export type CrearCitaInput = {
   dto: CrearCitaDTO;
   usuarioAutenticado: {
     id: string;
-    rol: ValorRolUsuario;
+    rol: string;
   };
 };
 
@@ -26,7 +27,7 @@ export class CrearCitaUseCase implements CasoDeUso<CrearCitaInput, Resultado<Cit
 
       // Regla de Negocio: Un asesor solo puede crear citas para sí mismo.
       // El administrador puede crear citas para cualquier asesor.
-      if (usuarioAutenticado.rol !== "ADMIN" && usuarioAutenticado.id !== dto.idUsuario) {
+      if (!PoliticaDeCita.puedeCrearParaOtroUsuario(usuarioAutenticado.rol) && usuarioAutenticado.id !== dto.idUsuario) {
         throw new ErrorDeDominio("No tienes permisos para crear una cita para otro usuario.", {
           codigo: "SIN_PERMISOS",
         });
@@ -41,7 +42,7 @@ export class CrearCitaUseCase implements CasoDeUso<CrearCitaInput, Resultado<Cit
         throw new ErrorDeValidacion("No se pueden agendar citas en el pasado.");
       }
 
-      const idUsuario = new IdUsuario(dto.idUsuario);
+      const idUsuario = idUsuarioRef(dto.idUsuario);
       const duracion = dto.duracionMinutos || 60;
       const fechaFin = new Date(fechaInicio.getTime() + duracion * 60000);
 

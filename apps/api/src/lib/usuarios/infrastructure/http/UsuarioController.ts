@@ -1,7 +1,7 @@
 import { type Context } from "hono";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type D1DatabaseLike } from "../../../shared/infrastructure";
-import { Pbkdf2PasswordHasher } from "../../../shared/infrastructure/security/Pbkdf2PasswordHasher";
+import { Pbkdf2PasswordHasher } from "../security/Pbkdf2PasswordHasher";
 import { CrearUsuarioUseCase } from "../../application";
 import { D1UsuarioRepository } from "../persistence/D1UsuarioRepository";
 import { UsuarioMapper } from "../persistence/UsuarioMapper";

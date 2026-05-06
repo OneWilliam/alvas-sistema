@@ -1,10 +1,5 @@
-import { type ValorRolUsuario } from "../../../usuarios";
 import { AuthToken, RefreshToken } from "../../domain/value-objects";
-
-export type PayloadToken = {
-  idUsuario: string;
-  rol: ValorRolUsuario;
-};
+import { type PayloadToken } from "../../domain/types/PayloadToken";
 
 export interface ITokenProvider {
   generarAuthToken(payload: PayloadToken): Promise<AuthToken> | AuthToken;

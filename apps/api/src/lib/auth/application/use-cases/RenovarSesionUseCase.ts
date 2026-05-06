@@ -1,9 +1,8 @@
 import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain";
-import { IdUsuario, type IUsuarioRepository } from "../../../usuarios";
 import { CredencialesInvalidasError, RefreshToken } from "../../domain";
 import { type SesionAutenticadaDTO } from "../dto";
-import { type ITokenProvider } from "../ports";
+import { type IAutenticadorDeUsuario, type ITokenProvider } from "../ports";
 
 export type RenovarSesionInput = {
   refreshToken: string;
@@ -13,7 +12,7 @@ export class RenovarSesionUseCase
   implements CasoDeUso<RenovarSesionInput, Resultado<SesionAutenticadaDTO, ErrorDeDominio>>
 {
   constructor(
-    private readonly usuarioRepository: IUsuarioRepository,
+    private readonly autenticador: IAutenticadorDeUsuario,
     private readonly tokenProvider: ITokenProvider,
   ) {}
 
@@ -21,15 +20,15 @@ export class RenovarSesionUseCase
     try {
       const refreshToken = new RefreshToken(input.refreshToken);
       const payloadRefresh = await this.tokenProvider.validarRefreshToken(refreshToken);
-      const usuario = await this.usuarioRepository.obtenerPorId(new IdUsuario(payloadRefresh.idUsuario));
+      const usuario = await this.autenticador.buscarPorId(payloadRefresh.idUsuario);
 
-      if (!usuario || usuario.estado.estaDeshabilitado()) {
+      if (!usuario || usuario.estaDeshabilitado) {
         return resultadoFallido(new CredencialesInvalidasError());
       }
 
       const payload = {
-        idUsuario: usuario.id.valor,
-        rol: usuario.rol.valor,
+        idUsuario: payloadRefresh.idUsuario,
+        rol: usuario.rol,
       };
       const authToken = await this.tokenProvider.generarAuthToken(payload);
       const nuevoRefreshToken = await this.tokenProvider.generarRefreshToken(payload);
@@ -51,3 +50,4 @@ export class RenovarSesionUseCase
     }
   }
 }
+

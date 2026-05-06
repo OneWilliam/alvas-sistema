@@ -1,7 +1,6 @@
 import { type CitaRespuestaDTO } from "../../application/dto/CitaDTOs";
 import { Cita } from "../../domain/entities/Cita";
-import { EstadoCita, IdCita } from "../../domain/value-objects";
-import { IdUsuario } from "../../../usuarios/domain/value-objects";
+import { EstadoCita, IdCita, idUsuarioRef } from "../../domain/value-objects";
 import { type CitaRow } from "./schema";
 
 export class CitaMapper {
@@ -9,7 +8,7 @@ export class CitaMapper {
     return Cita.reconstituir({
       id: new IdCita(row.id),
       idLead: row.idLead,
-      idUsuario: new IdUsuario(row.idUsuario),
+      idUsuario: idUsuarioRef(row.idUsuario),
       idPropiedad: row.idPropiedad || undefined,
       fechaInicio: new Date(row.fechaInicio),
       fechaFin: new Date(row.fechaFin),
@@ -24,7 +23,7 @@ export class CitaMapper {
     return {
       id: cita.id.valor,
       idLead: cita.idLead,
-      idUsuario: cita.idUsuario.valor,
+      idUsuario: cita.idUsuario as string,
       idPropiedad: cita.idPropiedad,
       fechaInicio: cita.fechaInicio.toISOString(),
       fechaFin: cita.fechaFin.toISOString(),
@@ -39,7 +38,7 @@ export class CitaMapper {
     return {
       id: cita.id.valor,
       idLead: cita.idLead,
-      idUsuario: cita.idUsuario.valor,
+      idUsuario: cita.idUsuario as string,
       idPropiedad: cita.idPropiedad,
       fechaInicio: cita.fechaInicio.toISOString(),
       fechaFin: cita.fechaFin.toISOString(),

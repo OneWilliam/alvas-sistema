@@ -2,9 +2,8 @@ import { eq, and, lt, gt, ne } from "drizzle-orm";
 import { type D1DatabaseLike } from "../../../shared/infrastructure";
 import { Cita } from "../../domain/entities";
 import { type ICitaRepository } from "../../domain/ports";
-import { IdCita } from "../../domain/value-objects";
-import { IdUsuario } from "../../../usuarios/domain/value-objects";
-import { obtenerDb } from "../../../usuarios/infrastructure/persistence/drizzle";
+import { IdCita, type IdUsuarioRef } from "../../domain/value-objects";
+import { obtenerDb } from "../../../shared/infrastructure/persistence/drizzle";
 import { citasTable, type CitaRow } from "./schema";
 import { CitaMapper } from "./CitaMapper";
 
@@ -68,13 +67,13 @@ export class D1CitaRepository implements ICitaRepository {
     return rows.map((row) => CitaMapper.aDominio(row as CitaRow));
   }
 
-  async obtenerPorUsuarioYFecha(idUsuario: IdUsuario, inicio: Date, fin: Date): Promise<Cita[]> {
+  async obtenerPorUsuarioYFecha(idUsuario: IdUsuarioRef, inicio: Date, fin: Date): Promise<Cita[]> {
     const rows = await this.drizzle()
       .select()
       .from(citasTable)
       .where(
         and(
-          eq(citasTable.idUsuario, idUsuario.valor),
+          eq(citasTable.idUsuario, idUsuario),
           gt(citasTable.fechaFin, inicio.toISOString()),
           lt(citasTable.fechaInicio, fin.toISOString())
         )
@@ -83,11 +82,11 @@ export class D1CitaRepository implements ICitaRepository {
     return rows.map((row) => CitaMapper.aDominio(row as CitaRow));
   }
 
-  async obtenerPorUsuario(idUsuario: IdUsuario): Promise<Cita[]> {
+  async obtenerPorUsuario(idUsuario: IdUsuarioRef): Promise<Cita[]> {
     const rows = await this.drizzle()
       .select()
       .from(citasTable)
-      .where(eq(citasTable.idUsuario, idUsuario.valor))
+      .where(eq(citasTable.idUsuario, idUsuario))
       .orderBy(citasTable.fechaInicio);
 
     return rows.map((row) => CitaMapper.aDominio(row as CitaRow));
@@ -103,9 +102,9 @@ export class D1CitaRepository implements ICitaRepository {
     return rows.map((row) => CitaMapper.aDominio(row as CitaRow));
   }
 
-  async existeTraslape(idUsuario: IdUsuario, inicio: Date, fin: Date, idCitaExcluir?: IdCita): Promise<boolean> {
+  async existeTraslape(idUsuario: IdUsuarioRef, inicio: Date, fin: Date, idCitaExcluir?: IdCita): Promise<boolean> {
     const conditions = [
-      eq(citasTable.idUsuario, idUsuario.valor),
+      eq(citasTable.idUsuario, idUsuario),
       gt(citasTable.fechaFin, inicio.toISOString()),
       lt(citasTable.fechaInicio, fin.toISOString()),
       ne(citasTable.estado, "CANCELADA")

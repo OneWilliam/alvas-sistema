@@ -1,6 +1,6 @@
 import { type IRepositorioEscritura, type IRepositorioLectura } from "../../../shared/domain";
-import { Usuario } from "../../domain/entities";
-import { IdUsuario } from "../../domain/value-objects";
+import { Usuario } from "../entities";
+import { IdUsuario } from "../value-objects";
 
 export interface IUsuarioRepository
   extends IRepositorioLectura<Usuario, IdUsuario>,

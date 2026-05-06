@@ -1,11 +1,10 @@
 import { ErrorDeValidacion } from "../../../shared/domain";
-import { IdUsuario } from "../../../usuarios/domain/value-objects/IdUsuario";
-import { EstadoCita, IdCita } from "../value-objects";
+import { EstadoCita, IdCita, idUsuarioRef, type IdUsuarioRef } from "../value-objects";
 
 type PropsCita = {
   id: IdCita;
   idLead: string; // Relación con el módulo de leads
-  idUsuario: IdUsuario;
+  idUsuario: IdUsuarioRef;
   idPropiedad?: string; // Opcional, si la cita es para una propiedad específica
   fechaInicio: Date;
   fechaFin: Date;
@@ -41,7 +40,7 @@ export class Cita {
     return new Cita({
       id: new IdCita(params.id),
       idLead: params.idLead,
-      idUsuario: new IdUsuario(params.idUsuario),
+      idUsuario: idUsuarioRef(params.idUsuario),
       idPropiedad: params.idPropiedad,
       fechaInicio: params.fechaInicio,
       fechaFin,
@@ -56,23 +55,46 @@ export class Cita {
     return new Cita(props);
   }
 
-  get id(): IdCita { return this.props.id; }
-  get idLead(): string { return this.props.idLead; }
-  get idUsuario(): IdUsuario { return this.props.idUsuario; }
-  get idPropiedad(): string | undefined { return this.props.idPropiedad; }
-  get fechaInicio(): Date { return this.props.fechaInicio; }
-  get fechaFin(): Date { return this.props.fechaFin; }
-  get estado(): EstadoCita { return this.props.estado; }
-  get observacion(): string | undefined { return this.props.observacion; }
-  get creadoEn(): Date { return this.props.creadoEn; }
-  get actualizadoEn(): Date { return this.props.actualizadoEn; }
+  get id(): IdCita {
+    return this.props.id;
+  }
+  get idLead(): string {
+    return this.props.idLead;
+  }
+  get idUsuario(): IdUsuarioRef {
+    return this.props.idUsuario;
+  }
+  get idPropiedad(): string | undefined {
+    return this.props.idPropiedad;
+  }
+  get fechaInicio(): Date {
+    return this.props.fechaInicio;
+  }
+  get fechaFin(): Date {
+    return this.props.fechaFin;
+  }
+  get estado(): EstadoCita {
+    return this.props.estado;
+  }
+  get observacion(): string | undefined {
+    return this.props.observacion;
+  }
+  get creadoEn(): Date {
+    return this.props.creadoEn;
+  }
+  get actualizadoEn(): Date {
+    return this.props.actualizadoEn;
+  }
 
   reprogramar(nuevaFecha: Date, duracionMinutos?: number): void {
     if (!this.props.estado.puedeReprogramarse()) {
-      throw new ErrorDeValidacion(`No se puede reprogramar una cita en estado ${this.props.estado.valor}`);
+      throw new ErrorDeValidacion(
+        `No se puede reprogramar una cita en estado ${this.props.estado.valor}`,
+      );
     }
 
-    const duracion = duracionMinutos || (this.props.fechaFin.getTime() - this.props.fechaInicio.getTime()) / 60000;
+    const duracion =
+      duracionMinutos || (this.props.fechaFin.getTime() - this.props.fechaInicio.getTime()) / 60000;
     this.props.fechaInicio = nuevaFecha;
     this.props.fechaFin = new Date(nuevaFecha.getTime() + duracion * 60000);
     this.props.estado = EstadoCita.reprogramada();
@@ -87,8 +109,8 @@ export class Cita {
 
     this.props.estado = EstadoCita.cancelada();
     if (motivo) {
-      this.props.observacion = this.props.observacion 
-        ? `${this.props.observacion} | Cancelado: ${motivo}` 
+      this.props.observacion = this.props.observacion
+        ? `${this.props.observacion} | Cancelado: ${motivo}`
         : `Cancelado: ${motivo}`;
     }
     this.props.actualizadoEn = new Date();
@@ -96,7 +118,9 @@ export class Cita {
 
   marcarComoRealizada(): void {
     if (this.props.estado.valor !== "PENDIENTE" && this.props.estado.valor !== "REPROGRAMADA") {
-      throw new ErrorDeValidacion("Solo se pueden marcar como realizadas las citas pendientes o reprogramadas.");
+      throw new ErrorDeValidacion(
+        "Solo se pueden marcar como realizadas las citas pendientes o reprogramadas.",
+      );
     }
     this.props.estado = EstadoCita.realizada();
     this.props.actualizadoEn = new Date();

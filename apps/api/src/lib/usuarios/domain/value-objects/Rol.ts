@@ -1,7 +1,8 @@
+import { type ValorRolAcceso } from "../../../auth/domain/value-objects/RolAcceso";
 import { RolDeUsuarioInvalidoError } from "../errors";
 
 export const ROLES_USUARIO = ["ADMIN", "ASESOR"] as const;
-export type ValorRolUsuario = (typeof ROLES_USUARIO)[number];
+export type ValorRolUsuario = ValorRolAcceso;
 
 export class Rol {
   private readonly valorInterno: ValorRolUsuario;
