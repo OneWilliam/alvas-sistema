@@ -1,5 +1,5 @@
 import { type IdLead } from "../value-objects/IdLead";
-import { type IdUsuarioRef } from "../value-objects/IdUsuarioRef";
+import { type IdUsuarioRef } from "../value-objects";
 import { TipoLead } from "../value-objects/TipoLead";
 
 type PropsLead = {

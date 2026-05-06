@@ -7,7 +7,7 @@ import {
 import { ErrorDeDominio, ErrorDeValidacion } from "../../../shared/domain";
 import { type ICitaRepository } from "../../domain/ports";
 import { Cita } from "../../domain/entities";
-import { idUsuarioRef } from "../../domain/value-objects/IdUsuarioRef";
+import { idUsuarioRef } from "../../domain/value-objects";
 import { type CrearCitaDTO } from "../dto/CitaDTOs";
 import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
 import { PoliticaDeCita } from "../../domain/services/PoliticaDeCita";

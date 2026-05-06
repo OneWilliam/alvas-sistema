@@ -2,7 +2,7 @@ import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } fr
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type ICitaRepository } from "../../domain/ports";
 import { Cita } from "../../domain/entities";
-import { idUsuarioRef } from "../../domain/value-objects/IdUsuarioRef";
+import { idUsuarioRef } from "../../domain/value-objects";
 import { PoliticaDeCita } from "../../domain/services/PoliticaDeCita";
 
 export type ListarCitasInput = {

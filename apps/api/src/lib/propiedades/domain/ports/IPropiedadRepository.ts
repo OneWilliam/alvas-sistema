@@ -1,7 +1,7 @@
 import { type IRepositorioEscritura, type IRepositorioLectura } from "../../../shared/domain";
 import { Propiedad } from "../entities/Propiedad";
 import { type IdPropiedad } from "../value-objects/IdPropiedad";
-import { type IdUsuarioRef } from "../value-objects/IdUsuarioRef";
+import { type IdUsuarioRef } from "../value-objects";
 
 export interface IPropiedadRepository
   extends IRepositorioLectura<Propiedad, IdPropiedad>,
