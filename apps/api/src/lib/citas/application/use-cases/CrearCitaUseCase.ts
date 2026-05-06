@@ -1,8 +1,13 @@
-import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
+import {
+  type CasoDeUso,
+  resultadoExitoso,
+  resultadoFallido,
+  type Resultado,
+} from "../../../shared";
 import { ErrorDeDominio, ErrorDeValidacion } from "../../../shared/domain";
 import { type ICitaRepository } from "../../domain/ports";
 import { Cita } from "../../domain/entities";
-import { type IdUsuarioRef, idUsuarioRef } from "../../domain/value-objects/IdUsuarioRef";
+import { idUsuarioRef } from "../../domain/value-objects/IdUsuarioRef";
 import { type CrearCitaDTO } from "../dto/CitaDTOs";
 import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
 import { PoliticaDeCita } from "../../domain/services/PoliticaDeCita";
@@ -15,10 +20,13 @@ export type CrearCitaInput = {
   };
 };
 
-export class CrearCitaUseCase implements CasoDeUso<CrearCitaInput, Resultado<Cita, ErrorDeDominio>> {
+export class CrearCitaUseCase implements CasoDeUso<
+  CrearCitaInput,
+  Resultado<Cita, ErrorDeDominio>
+> {
   constructor(
     private readonly citaRepository: ICitaRepository,
-    private readonly generadorId: IGeneradorId
+    private readonly generadorId: IGeneradorId,
   ) {}
 
   async ejecutar(input: CrearCitaInput): Promise<Resultado<Cita, ErrorDeDominio>> {
@@ -27,7 +35,10 @@ export class CrearCitaUseCase implements CasoDeUso<CrearCitaInput, Resultado<Cit
 
       // Regla de Negocio: Un asesor solo puede crear citas para sí mismo.
       // El administrador puede crear citas para cualquier asesor.
-      if (!PoliticaDeCita.puedeCrearParaOtroUsuario(usuarioAutenticado.rol) && usuarioAutenticado.id !== dto.idUsuario) {
+      if (
+        !PoliticaDeCita.puedeCrearParaOtroUsuario(usuarioAutenticado.rol) &&
+        usuarioAutenticado.id !== dto.idUsuario
+      ) {
         throw new ErrorDeDominio("No tienes permisos para crear una cita para otro usuario.", {
           codigo: "SIN_PERMISOS",
         });
@@ -47,7 +58,11 @@ export class CrearCitaUseCase implements CasoDeUso<CrearCitaInput, Resultado<Cit
       const fechaFin = new Date(fechaInicio.getTime() + duracion * 60000);
 
       // Verificar disponibilidad (traslapes)
-      const hayTraslape = await this.citaRepository.existeTraslape(idUsuario, fechaInicio, fechaFin);
+      const hayTraslape = await this.citaRepository.existeTraslape(
+        idUsuario,
+        fechaInicio,
+        fechaFin,
+      );
       if (hayTraslape) {
         throw new ErrorDeValidacion("El usuario ya tiene una cita agendada en ese horario.");
       }
