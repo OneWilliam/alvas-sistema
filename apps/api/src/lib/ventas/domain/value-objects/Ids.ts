@@ -8,3 +8,6 @@ export const idCita = (valor: string): IdCita => valor as IdCita;
 
 export type IdCliente = Marca<string, "IdCliente">;
 export const idCliente = (valor: string): IdCliente => valor as IdCliente;
+
+export type IdContrato = Marca<string, "IdContrato">;
+export const idContrato = (valor: string): IdContrato => valor as IdContrato;

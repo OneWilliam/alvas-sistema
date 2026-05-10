@@ -1,7 +1,6 @@
 import { Lead } from "../entities/Lead";
-import { type IdLead } from "../value-objects/Ids";
 import { Cliente } from "../entities/Cliente";
-import { type IdCliente } from "../value-objects/Ids";
+import { type IdLead, type IdCliente } from "../value-objects/Ids";
 import { type IdUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
 
 export interface IVentasRepository {

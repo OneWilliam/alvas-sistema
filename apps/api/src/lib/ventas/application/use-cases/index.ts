@@ -4,3 +4,6 @@ export * from "./ActualizarLeadUseCase";
 export * from "./ActualizarCitaUseCase";
 export * from "./ConvertirLeadAClienteUseCase";
 export * from "./RegistrarClienteDirectoUseCase";
+export * from "./ListarLeadsUseCase";
+export * from "./ListarCitasUseCase";
+export * from "./FirmarContratoUseCase";

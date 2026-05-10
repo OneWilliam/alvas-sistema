@@ -21,7 +21,7 @@ export class ConvertirLeadAClienteUseCase implements CasoDeUso<ConvertirLeadACli
       if (!lead) return resultadoFallido(new ErrorDeDominio("Lead no encontrado", { codigo: "LEAD_NO_ENCONTRADO" }));
 
       const nuevoIdCliente = idCliente(this.generadorId.generar());
-      
+
       const cliente = Cliente.crear({
         id: nuevoIdCliente as string,
         nombre: lead.nombre,
@@ -32,7 +32,7 @@ export class ConvertirLeadAClienteUseCase implements CasoDeUso<ConvertirLeadACli
       });
 
       lead.convertirACliente(nuevoIdCliente);
-      
+
       await this.repository.guardarCliente(cliente);
       await this.repository.guardarLead(lead);
       await this.repository.registrarActividad(lead.id, "CONVERTIDO_A_CLIENTE", `Lead convertido a cliente con ID ${nuevoIdCliente}`);

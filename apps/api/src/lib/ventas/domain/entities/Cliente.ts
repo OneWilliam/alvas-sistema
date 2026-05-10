@@ -44,4 +44,11 @@ export class Cliente {
   get idLeadOrigen(): IdLead | undefined { return this.props.idLeadOrigen; }
   get creadoEn(): Date { return this.props.creadoEn; }
   get actualizadoEn(): Date { return this.props.actualizadoEn; }
+
+  actualizarDatosContacto(params: { nombre?: string; email?: string; telefono?: string }): void {
+    if (params.nombre) this.props.nombre = params.nombre;
+    if (params.email) this.props.email = params.email;
+    if (params.telefono) this.props.telefono = params.telefono;
+    this.props.actualizadoEn = new Date();
+  }
 }
