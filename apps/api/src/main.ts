@@ -6,6 +6,7 @@ import { crearUsuarioRouter } from "./lib/usuarios/infrastructure";
 import { citaRouter } from "./lib/citas/infrastructure";
 import { leadRouter } from "./lib/leads/infrastructure";
 import { propiedadRouter } from "./lib/propiedades/infrastructure";
+import { ventasRouter } from "./lib/ventas/infrastructure";
 import { type D1DatabaseLike } from "./lib/shared/infrastructure";
 
 type AppBindings = {
@@ -29,6 +30,7 @@ app.route("/auth", crearAuthRouter());
 app.route("/citas", citaRouter);
 app.route("/leads", leadRouter);
 app.route("/propiedades", propiedadRouter);
+app.route("/ventas", ventasRouter);
 
 app.onError((error, c) => {
   if (error instanceof ErrorDeDominio) {
