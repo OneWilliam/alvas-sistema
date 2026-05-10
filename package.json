@@ -13,7 +13,7 @@
     "db:migrate:local": "bun --cwd apps/api wrangler d1 migrations apply alvas-dev --local",
     "db:migrate:remote": "bun --cwd apps/api wrangler d1 migrations apply alvas-main --remote",
     "test": "bun test",
-    "typecheck": "tsc --noEmit -p apps/api/tsconfig.json && tsc --noEmit -p apps/web/tsconfig.json && tsc --noEmit -p packages/shared-types/tsconfig.json && tsc --noEmit -p packages/shared-utils/tsconfig.json",
+    "typecheck": "tsc --noEmit -p apps/api/tsconfig.json && tsc --noEmit -p apps/web/tsconfig.json",
     "format": "prettier --write .",
     "lint": "eslint . --max-warnings=0",
     "prepare": "husky",

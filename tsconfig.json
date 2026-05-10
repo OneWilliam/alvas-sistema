@@ -19,12 +19,8 @@
     "paths": {
       "@alvas/api/*": ["apps/api/src/*"],
       "@alvas/web/*": ["apps/web/src/*"],
-      "@alvas/shared-types": ["packages/shared-types/src/index.ts"],
-      "@alvas/shared-types/*": ["packages/shared-types/src/*"],
-      "@alvas/shared-utils": ["packages/shared-utils/src/index.ts"],
-      "@alvas/shared-utils/*": ["packages/shared-utils/src/*"]
-    }
+    },
   },
-  "include": ["apps/**/*.ts", "packages/**/*.ts"],
-  "exclude": ["node_modules", "dist", "out", ".wrangler", "coverage"]
+  "include": ["apps/**/*.ts"],
+  "exclude": ["node_modules", "dist", "out", ".wrangler", "coverage"],
 }
