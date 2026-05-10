@@ -4,7 +4,9 @@ import {
   RegistrarLeadUseCase, 
   AgendarCitaUseCase, 
   ConvertirLeadAClienteUseCase, 
-  RegistrarClienteDirectoUseCase 
+  RegistrarClienteDirectoUseCase,
+  ActualizarLeadUseCase,
+  ActualizarCitaUseCase
 } from "../../application";
 import { D1VentasRepository } from "../persistence/D1VentasRepository";
 import { UuidGeneradorId } from "../../../shared/infrastructure/security/UuidGeneradorId";
@@ -39,8 +41,7 @@ export class VentasController {
       }
 
       return c.json({ success: true, data: { id: resultado.valor.id as string } }, 201);
-    } catch (error) {
-      console.error(error);
+    } catch {
       return c.json({ success: false, message: "Error interno" }, 500);
     }
   }
@@ -62,8 +63,7 @@ export class VentasController {
       }
 
       return c.json({ success: true, message: "Cita agendada" });
-    } catch (error) {
-      console.error(error);
+    } catch {
       return c.json({ success: false, message: "Error interno" }, 500);
     }
   }
@@ -86,8 +86,7 @@ export class VentasController {
       }
 
       return c.json({ success: true, data: { id: resultado.valor.id as string } }, 201);
-    } catch (error) {
-      console.error(error);
+    } catch {
       return c.json({ success: false, message: "Error interno" }, 500);
     }
   }
@@ -106,8 +105,47 @@ export class VentasController {
       }
 
       return c.json({ success: true, data: { idCliente: resultado.valor.id as string } });
-    } catch (error) {
-      console.error(error);
+    } catch {
+      return c.json({ success: false, message: "Error interno" }, 500);
+    }
+  }
+
+  async editarLead(c: ContextoVentas): Promise<Response> {
+    try {
+      const id = c.req.param("id") ?? "";
+      const body = await c.req.json<{ nombre?: string; email?: string; telefono?: string; tipo?: string }>();
+      const repo = new D1VentasRepository(c.env.DB);
+      const useCase = new ActualizarLeadUseCase(repo);
+
+      const resultado = await useCase.ejecutar({ id, ...body });
+
+      if (!resultado.esExito) return c.json({ success: false, message: resultado.error.message }, 400);
+
+      return c.json({ success: true, message: "Lead actualizado" });
+    } catch {
+      return c.json({ success: false, message: "Error interno" }, 500);
+    }
+  }
+
+  async editarCita(c: ContextoVentas): Promise<Response> {
+    try {
+      const idLead = c.req.param("idLead") ?? "";
+      const idCita = c.req.param("idCita") ?? "";
+      const body = await c.req.json<{ fechaInicio?: string; duracionMinutos?: number; observacion?: string }>();
+      const repo = new D1VentasRepository(c.env.DB);
+      const useCase = new ActualizarCitaUseCase(repo);
+
+      const resultado = await useCase.ejecutar({
+        idLead,
+        idCita,
+        ...body,
+        fechaInicio: body.fechaInicio ? new Date(body.fechaInicio) : undefined,
+      });
+
+      if (!resultado.esExito) return c.json({ success: false, message: resultado.error.message }, 400);
+
+      return c.json({ success: true, message: "Cita actualizada" });
+    } catch {
       return c.json({ success: false, message: "Error interno" }, 500);
     }
   }
@@ -129,8 +167,7 @@ export class VentasController {
           citasCount: l.citas.length
         }))
       });
-    } catch (error) {
-      console.error(error);
+    } catch {
       return c.json({ success: false, message: "Error interno" }, 500);
     }
   }
