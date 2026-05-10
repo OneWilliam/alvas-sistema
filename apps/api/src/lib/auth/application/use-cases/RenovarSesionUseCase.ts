@@ -2,7 +2,7 @@ import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } fr
 import { ErrorDeDominio } from "../../../shared/domain";
 import { CredencialesInvalidasError, RefreshToken } from "../../domain";
 import { type SesionAutenticadaDTO } from "../dto";
-import { type IAutenticadorDeUsuario, type ITokenProvider } from "../ports";
+import { type IAutenticadorDeUsuario, type ITokenProvider } from "../../domain/ports";
 
 export type RenovarSesionInput = {
   refreshToken: string;

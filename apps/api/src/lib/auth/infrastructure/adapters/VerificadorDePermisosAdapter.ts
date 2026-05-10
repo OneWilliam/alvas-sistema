@@ -1,4 +1,4 @@
-import { type IVerificadorDePermisos } from "../../application/ports/IVerificadorDePermisos";
+import { type IVerificadorDePermisos } from "../../domain/ports/IVerificadorDePermisos";
 
 export class VerificadorDePermisosAdapter implements IVerificadorDePermisos {
   puedeVerLeadsGlobales(rol: string): boolean {

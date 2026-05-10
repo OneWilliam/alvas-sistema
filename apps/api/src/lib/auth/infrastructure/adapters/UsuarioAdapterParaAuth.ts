@@ -1,4 +1,4 @@
-import { type IAutenticadorDeUsuario } from "../../application/ports/IAutenticadorDeUsuario";
+import { type IAutenticadorDeUsuario } from "../../domain/ports/IAutenticadorDeUsuario";
 import { type IUsuarioRepository } from "../../../usuarios/domain/ports";
 import { IdUsuario } from "../../../usuarios/domain/value-objects";
 import { type ValorRolAcceso } from "../../domain/value-objects/RolAcceso";

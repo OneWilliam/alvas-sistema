@@ -1,5 +1,5 @@
-import { type IVerificadorDeClave } from "../../application/ports/IVerificadorDeClave";
-import { type IPasswordHasher } from "../../../usuarios/application/ports";
+import { type IVerificadorDeClave } from "../../domain/ports/IVerificadorDeClave";
+import { type IPasswordHasher } from "../../../usuarios/domain/ports";
 
 export class VerificadorDeClaveAdapter implements IVerificadorDeClave {
   constructor(private readonly passwordHasher: IPasswordHasher) {}

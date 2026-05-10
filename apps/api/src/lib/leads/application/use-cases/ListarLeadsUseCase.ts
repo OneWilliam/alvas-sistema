@@ -3,7 +3,7 @@ import { ErrorDeDominio } from "../../../shared/domain";
 import { type ILeadRepository } from "../../domain/ports";
 import { Lead } from "../../domain/entities";
 import { idUsuarioRef } from "../../domain/value-objects";
-import { type IVerificadorDePermisos } from "../../../auth/application/ports";
+import { type IVerificadorDePermisos } from "../../../auth/domain/ports";
 
 export type ListarLeadsInput = {
   usuarioAutenticado: {

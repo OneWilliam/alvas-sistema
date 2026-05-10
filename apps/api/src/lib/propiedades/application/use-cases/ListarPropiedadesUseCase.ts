@@ -3,7 +3,7 @@ import { ErrorDeDominio } from "../../../shared/domain";
 import { type IPropiedadRepository } from "../../domain/ports";
 import { Propiedad } from "../../domain/entities";
 import { idUsuarioRef } from "../../domain/value-objects";
-import { type IVerificadorDePermisos } from "../../../auth/application/ports";
+import { type IVerificadorDePermisos } from "../../../auth/domain/ports";
 
 export type ListarPropiedadesInput = {
   usuarioAutenticado: {

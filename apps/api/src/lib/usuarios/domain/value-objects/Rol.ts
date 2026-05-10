@@ -1,8 +1,8 @@
-import { type ValorRolAcceso } from "../../../auth/domain/value-objects/RolAcceso";
+import { ROLES_SISTEMA, type ValorRol } from "../../../shared/domain/types/Roles";
 import { RolDeUsuarioInvalidoError } from "../errors";
 
-export const ROLES_USUARIO = ["ADMIN", "ASESOR"] as const;
-export type ValorRolUsuario = ValorRolAcceso;
+export const ROLES_USUARIO = ROLES_SISTEMA;
+export type ValorRolUsuario = ValorRol;
 
 export class Rol {
   private readonly valorInterno: ValorRolUsuario;
@@ -16,6 +16,7 @@ export class Rol {
 
     this.valorInterno = rolNormalizado as ValorRolUsuario;
   }
+// ...
 
   get valor(): ValorRolUsuario {
     return this.valorInterno;

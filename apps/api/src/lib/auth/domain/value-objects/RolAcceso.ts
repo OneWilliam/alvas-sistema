@@ -1,2 +1,4 @@
-export const ROLES_ACCESO = ["ADMIN", "ASESOR"] as const;
-export type ValorRolAcceso = (typeof ROLES_ACCESO)[number];
+import { ROLES_SISTEMA, type ValorRol } from "../../../shared/domain/types/Roles";
+
+export const ROLES_ACCESO = ROLES_SISTEMA;
+export type ValorRolAcceso = ValorRol;

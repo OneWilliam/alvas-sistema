@@ -2,7 +2,7 @@ import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } fr
 import { ErrorDeDominio } from "../../../shared/domain";
 import { CredencialesInvalidasError } from "../../domain";
 import { type SesionAutenticadaDTO } from "../dto";
-import { type IAutenticadorDeUsuario, type ITokenProvider, type IVerificadorDeClave } from "../ports";
+import { type IAutenticadorDeUsuario, type ITokenProvider, type IVerificadorDeClave } from "../../domain/ports";
 
 export type IniciarSesionInput = {
   idUsuario: string;

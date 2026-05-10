@@ -1,7 +1,6 @@
 import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain";
-import { type IPasswordHasher } from "../ports";
-import { type IUsuarioRepository } from "../../domain/ports";
+import { type IPasswordHasher, type IUsuarioRepository } from "../../domain/ports";
 import { Usuario } from "../../domain/entities";
 import { IdUsuario } from "../../domain/value-objects";
 import { UsuarioYaExisteError } from "../../domain/errors";

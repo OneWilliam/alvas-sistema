@@ -3,7 +3,7 @@ import { type ILeadRepository } from "../../domain/ports";
 import { Lead } from "../../domain/entities";
 import { idUsuarioRef } from "../../domain/value-objects";
 import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
-import { type IVerificadorDePermisos } from "../../../auth/application/ports";
+import { type IVerificadorDePermisos } from "../../../auth/domain/ports";
 import { LeadError } from "../../domain/errors/LeadError";
 
 export type CrearLeadInput = {

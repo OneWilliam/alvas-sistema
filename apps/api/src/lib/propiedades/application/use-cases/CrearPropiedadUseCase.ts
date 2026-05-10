@@ -3,7 +3,7 @@ import { type IPropiedadRepository } from "../../domain/ports";
 import { Propiedad } from "../../domain/entities";
 import { idUsuarioRef } from "../../domain/value-objects";
 import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
-import { type IVerificadorDePermisos } from "../../../auth/application/ports";
+import { type IVerificadorDePermisos } from "../../../auth/domain/ports";
 import { PropiedadError } from "../../domain/errors/PropiedadError";
 
 export type CrearPropiedadInput = {
