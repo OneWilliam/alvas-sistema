@@ -3,8 +3,6 @@ import { ErrorDeDominio } from "./lib/shared/domain";
 import { type PayloadToken } from "./lib/auth/application";
 import { crearAuthRouter } from "./lib/auth/infrastructure";
 import { crearUsuarioRouter } from "./lib/usuarios/infrastructure";
-import { citaRouter } from "./lib/citas/infrastructure";
-import { leadRouter } from "./lib/leads/infrastructure";
 import { propiedadRouter } from "./lib/propiedades/infrastructure";
 import { ventasRouter } from "./lib/ventas/infrastructure";
 import { type D1DatabaseLike } from "./lib/shared/infrastructure";
@@ -27,8 +25,6 @@ const app = new Hono<{ Bindings: AppBindings; Variables: AppVariables }>();
 app.get("/health", (c) => c.json({ status: "ok", service: "alvas-api" }));
 app.route("/usuarios", crearUsuarioRouter());
 app.route("/auth", crearAuthRouter());
-app.route("/citas", citaRouter);
-app.route("/leads", leadRouter);
 app.route("/propiedades", propiedadRouter);
 app.route("/ventas", ventasRouter);
 
