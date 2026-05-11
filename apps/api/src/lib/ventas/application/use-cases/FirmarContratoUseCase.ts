@@ -4,6 +4,7 @@ import { type IContratoRepository } from "../../domain/ports/IContratoRepository
 import { type IdContrato } from "../../domain/value-objects/Ids";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { ContratoNoEncontradoError } from "../../domain/errors/DomainErrors";
+import { type IFirmarContrato } from "../ports/in";
 
 export type FirmarContratoInput = {
   idContrato: string;
@@ -12,7 +13,9 @@ export type FirmarContratoInput = {
 export class FirmarContratoUseCase implements CasoDeUso<
   FirmarContratoInput,
   Resultado<void, ErrorDeDominio>
-> {
+>,
+  IFirmarContrato
+{
   constructor(private readonly contratoRepository: IContratoRepository) {}
 
   async ejecutar(input: FirmarContratoInput): Promise<Resultado<void, ErrorDeDominio>> {

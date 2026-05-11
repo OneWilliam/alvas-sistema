@@ -9,6 +9,7 @@ import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { Cita } from "../../domain/entities/Cita";
 import { idLead, idCita } from "../../domain/value-objects/Ids";
 import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
+import { type IAgendarCita } from "../ports/in";
 
 export type AgendarCitaInput = {
   idLead: string;
@@ -21,7 +22,9 @@ export type AgendarCitaInput = {
 export class AgendarCitaUseCase implements CasoDeUso<
   AgendarCitaInput,
   Resultado<void, ErrorDeDominio>
-> {
+>,
+  IAgendarCita
+{
   constructor(
     private readonly repository: IVentasRepository,
     private readonly generadorId: IGeneradorId,

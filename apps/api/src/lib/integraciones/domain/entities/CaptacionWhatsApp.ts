@@ -1,4 +1,5 @@
 import { ErrorDeValidacion } from "../../../shared/domain";
+import { Captacion } from "./Captacion";
 
 type CaptacionWhatsAppProps = Readonly<{
   telefono: string;
@@ -53,5 +54,20 @@ export class CaptacionWhatsApp {
 
   get emailDeContactoProvisional(): string {
     return `${this.props.telefono}@contacto.whatsapp.local`;
+  }
+
+  aCaptacion(): Captacion {
+    return Captacion.registrar({
+      canal: "WHATSAPP",
+      origen: "whatsapp_webhook",
+      nombre: this.nombre,
+      telefono: this.telefono,
+      email: this.emailDeContactoProvisional,
+      tipo: this.tipo,
+      idPropiedadInteres: this.idPropiedadInteres,
+      metadata: {
+        canal: "whatsapp",
+      },
+    });
   }
 }

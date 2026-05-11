@@ -1,65 +1,85 @@
 # Alvas-Sistema - Arquitectura Actual del Backend
 
-Este documento describe el estado real del backend en `apps/api/src/lib`.
-## Criterio de lectura
+Este documento describe el estado actual del backend en `apps/api/src/lib`, la semantica de capas segun DDD + arquitectura hexagonal, los aggregate roots identificados, los puertos primarios/secundarios y las comunicaciones entre bounded contexts.
 
-- `Puertos primarios`: puntos de entrada al contexto. En este backend se materializan como routers/controladores HTTP y los casos de uso que orquestan la aplicacion.
-- `Puertos secundarios`: interfaces que el dominio o la aplicacion necesitan para hablar con afuera.
-- `Adaptadores secundarios`: implementaciones concretas de esos puertos.
-- `Comunicacion entre modulos`: solo mediante puertos, claims de sesion compartidos o adaptadores explicitos.
+Validacion actual:
+- `bun run lint`: OK
+- `bun run typecheck`: OK
 
-## Bounded Contexts
+## Capas y logica
+
+- `Domain`: reglas de negocio puras, invariantes, comportamiento de entidades y value objects.
+- `Application / use cases`: orquestacion de negocio. Coordinan aggregates, puertos y transacciones, pero no deben contener reglas de negocio profundas que pertenezcan al dominio.
+- `Infrastructure / adapters`: implementacion concreta de puertos, HTTP, DB, crypto e integraciones externas.
+
+## Semantica de puertos y adaptadores
+
+- `Puertos primarios`: interfaces de entrada del sistema. En este backend viven en `application/ports/in` y son implementadas por los use cases.
+- `Puertos secundarios`: interfaces de salida necesarias para persistencia, tokens, autorizacion o integraciones. En este backend viven en `domain/ports`.
+- `Adaptadores primarios`: HTTP routers/controllers que traducen requests externos a DTOs/comandos de aplicacion.
+- `Adaptadores secundarios`: implementaciones concretas de puertos secundarios en `infrastructure`.
+- `Composition root`: `apps/api/src/main.ts` compone repositorios, generadores, token providers y use cases concretos; los controllers ya no crean esas dependencias directamente.
+
+## Aggregate roots por bounded context
 
 ### `shared`
+- No tiene aggregate root. Es un modulo transversal tecnico.
 
-Responsabilidad:
-- Tipos base, errores transversales, contratos genericos, persistencia compartida, generacion de ids y sesion tecnica.
+### `auth`
+- Aggregate root: `Sesion`
+- Responsabilidad: credenciales, login, refresh, tokens y sesion autenticada.
 
-Casos de uso:
-- `CasoDeUso`
-- `Resultado`
+### `usuarios`
+- Aggregate root: `Usuario`
+- Responsabilidad: identidad interna del sistema (`id`, `username`, `nombre`, `rol`, `estado`, `hashClave`).
 
-DTOs:
-- No aplica como modulo de negocio.
+### `propiedades`
+- Aggregate root: `Propiedad`
+- Responsabilidad: catalogo de propiedades y asignacion/visibilidad por asesor.
 
-Entidades:
-- No aplica.
+### `ventas`
+- Este bounded context tiene multiples aggregate roots. Eso es valido en DDD.
+- Aggregate roots:
+  - `Lead`
+  - `Cliente`
+  - `Contrato`
+- `Cita` no se trata como root independiente; pertenece al agregado comercial que la contiene.
+- Responsabilidad: pipeline comercial, clientes, citas, conversiones y contratos.
 
-Value objects y tipos:
-- `IdUsuarioRef`
-- `Roles`
-- `Marca`
-- `Nulo`
-- `Primitivo`
+### `reportes`
+- No tiene aggregate root transaccional y no debe forzarse uno artificial.
+- Es un `read context` puro.
+- Modelos de lectura/proyeccion actuales:
+  - `ReporteGeneral`
+  - `EstadisticasGlobales`
+- Responsabilidad: metricas, dashboards y consultas derivadas.
 
-Puertos secundarios:
-- `IGeneradorId`
-- `IReloj`
-- `IRepositorioLectura`
-- `IRepositorioEscritura`
+### `integraciones`
+- Aggregate root: `Captacion`
+- Modelos por canal:
+  - `CaptacionWhatsApp` como normalizador/canal de entrada
+- Responsabilidad: captacion multicanal y normalizacion de entradas externas antes de delegar a `ventas`.
 
-Puertos primarios:
-- `SessionClaims`
-- `verifySessionMiddleware`
-- `requireRolesMiddleware`
-
-Adaptadores secundarios:
-- `UuidGeneradorId`
-- `drizzle`
-- `D1DatabaseLike`
+## Inventario por modulo
 
 ### `auth`
 
-Responsabilidad:
-- Credenciales, login, refresh, tokens y sesion autenticada.
-- No es dueno de permisos de negocio de otros modulos.
-
-Casos de uso:
+Use cases:
 - `IniciarSesionUseCase`
 - `RenovarSesionUseCase`
 
+Puertos primarios:
+- `IIniciarSesion`
+- `IRenovarSesion`
+
+Puertos secundarios:
+- `IConsultaCredencialesUsuario`
+- `IVerificadorDeClave`
+- `ITokenProvider`
+
 DTOs:
 - `SesionAutenticadaDTO`
+- `RenovarSesionDTO`
 
 Entidades:
 - `Sesion`
@@ -69,44 +89,38 @@ Value objects:
 - `RefreshToken`
 - `RolAcceso`
 
-Puertos secundarios:
-- `IConsultaCredencialesUsuario`
-- `IVerificadorDeClave`
-- `ITokenProvider`
-
-Puertos primarios:
-- Router HTTP: `crearAuthRouter`
-- Controller HTTP: `AuthController`
-- Endpoints:
-  - `POST /auth/login`
-  - `POST /auth/refresh`
-
 Adaptadores secundarios:
 - `HmacTokenProvider`
 - `TokenProviderFactory`
 
-Notas:
-- `auth` no importa `usuarios/domain`.
-- Login usa `username + clave`.
-- Los claims de sesion viven en `shared/infrastructure/session`, no en `auth`.
+Adaptadores primarios:
+- `AuthController`
+- `crearAuthRouter`
 
 ### `usuarios`
 
-Responsabilidad:
-- Gestion del usuario interno del sistema.
-- Dueño de la identidad interna: `id`, `username`, `nombre`, `rol`, `estado`, `hashClave`.
-
-Casos de uso:
+Use cases:
 - `CrearUsuarioUseCase`
 - `ListarUsuariosUseCase`
 - `ObtenerUsuarioUseCase`
 - `ActualizarUsuarioUseCase`
+
+Puertos primarios:
+- `ICrearUsuario`
+- `IListarUsuarios`
+- `IObtenerUsuario`
+- `IActualizarUsuario`
+
+Puertos secundarios:
+- `IUsuarioRepository`
+- `IPasswordHasher`
 
 DTOs:
 - `CrearUsuarioDTO`
 - `UsuarioRespuestaDTO`
 - `UsuarioOutputDTO`
 - `ActualizarUsuarioInputDTO`
+- `ActualizarUsuarioBodyDTO`
 - `UsuarioListadoOutputDTO`
 
 Entidades:
@@ -120,46 +134,36 @@ Value objects:
 - `Rol`
 - `EstadoUsuario`
 
-Puertos secundarios:
-- `IUsuarioRepository`
-- `IPasswordHasher`
-
-Puertos primarios:
-- Router HTTP: `crearUsuarioRouter`
-- Controller HTTP: `UsuarioController`
-- Endpoints:
-  - `GET /usuarios`
-  - `POST /usuarios`
-  - `GET /usuarios/:idUsuario`
-  - `PUT /usuarios/:idUsuario`
-
 Adaptadores secundarios:
 - `D1UsuarioRepository`
 - `UsuarioMapper`
 - `Pbkdf2PasswordHasher`
 
-Adaptadores de integracion saliente:
+Adaptadores hacia otros contextos:
 - `ConsultaCredencialesUsuarioAdapter`
-  - expone a `auth` el puerto `IConsultaCredencialesUsuario`
 - `VerificadorDeClavePbkdf2Adapter`
-  - implementa para `auth` el puerto `IVerificadorDeClave`
 
-Persistencia:
-- Tabla `usuarios`
-- Columna nueva: `username`
-- Migracion: `apps/api/drizzle/0004_username_only_auth.sql`
+Adaptadores primarios:
+- `UsuarioController`
+- `crearUsuarioRouter`
 
 ### `propiedades`
 
-Responsabilidad:
-- Gestion del catalogo de propiedades y visibilidad por asesor/admin.
-
-Casos de uso:
+Use cases:
 - `CrearPropiedadUseCase`
 - `ListarPropiedadesUseCase`
 
+Puertos primarios:
+- `ICrearPropiedad`
+- `IListarPropiedades`
+
+Puertos secundarios:
+- `IPropiedadRepository`
+- `IAutorizadorPropiedades`
+
 DTOs:
-- No hay carpeta `dto`; el controller maneja payloads HTTP directos.
+- `CrearPropiedadDTO`
+- `PropiedadRespuestaDTO`
 
 Entidades:
 - `Propiedad`
@@ -167,35 +171,26 @@ Entidades:
 Value objects:
 - `Ids`
 
-Puertos secundarios:
-- `IPropiedadRepository`
-- `IAutorizadorPropiedades`
-
-Puertos primarios:
-- Router HTTP: `crearPropiedadRouter`
-- Controller HTTP: `PropiedadController`
-- Endpoints:
-  - `GET /propiedades`
-  - `POST /propiedades`
-
 Adaptadores secundarios:
 - `D1PropiedadRepository`
 - `PropiedadMapper`
 - `AutorizadorPropiedadesAdapter`
 
-Notas:
-- La autorizacion de negocio no depende de `auth/domain`.
-- La autenticacion tecnica entra por `verifySessionMiddleware`.
+Adaptadores primarios:
+- `PropiedadController`
+- `crearPropiedadRouter`
 
 ### `ventas`
 
-Responsabilidad:
-- Pipeline comercial: leads, clientes, citas, contratos y asignacion a asesores.
-- `email` se conserva como dato externo de contacto, no como identidad interna.
-
-Casos de uso:
+Use cases expuestos hoy por HTTP:
 - `RegistrarLeadUseCase`
 - `RegistrarClienteDirectoUseCase`
+- `AgendarCitaUseCase`
+- `ConvertirLeadAClienteUseCase`
+- `ActualizarLeadUseCase`
+- `ActualizarCitaUseCase`
+
+Otros use cases existentes:
 - `ObtenerLeadUseCase`
 - `ObtenerClienteUseCase`
 - `ObtenerCitaPorIdUseCase`
@@ -209,12 +204,30 @@ Casos de uso:
 - `FirmarContratoUseCase`
 - `EvaluarLeadParaAsignarUseCase`
 - `CrearContratoUseCase`
-- `ConvertirLeadAClienteUseCase`
 - `AsignarLeadAAsesorUseCase`
-- `AgendarCitaUseCase`
-- `ActualizarLeadUseCase`
 - `ActualizarClienteUseCase`
-- `ActualizarCitaUseCase`
+
+Puertos primarios implementados:
+- `IActualizarCliente`
+- `IRegistrarLead`
+- `IRegistrarClienteDirecto`
+- `IAgendarCita`
+- `IConvertirLeadACliente`
+- `IActualizarLead`
+- `IActualizarCita`
+- `IObtenerLead`
+- `IObtenerCliente`
+- `IObtenerCitaPorId`
+- `IListarLeads`
+- `IListarLeadsPorAsesor`
+- `IListarClientes`
+- `IListarCitas`
+- `IListarAsesoresConLeads`
+
+Puertos secundarios:
+- `IVentasRepository`
+- `IContratoRepository`
+- `IAutorizadorVentas`
 
 DTOs:
 - `LeadDTOs`
@@ -233,175 +246,119 @@ Value objects:
 - `Ids`
 - `TipoVenta`
 
-Puertos secundarios:
-- `IVentasRepository`
-- `IContratoRepository`
-- `IAutorizadorVentas`
-
-Puertos primarios:
-- Router HTTP: `ventasRouter`
-- Controller HTTP: `VentasController`
-- Endpoints:
-  - `GET /ventas/pipeline`
-  - `POST /ventas/lead`
-  - `PUT /ventas/lead/:id`
-  - `POST /ventas/cliente`
-  - `POST /ventas/cita`
-  - `PUT /ventas/lead/:idLead/cita/:idCita`
-  - `POST /ventas/convertir`
-
 Adaptadores secundarios:
 - `D1VentasRepository`
 - `VentasMapper`
 - `AutorizadorVentasAdapter`
 
-Adaptadores publicados a otros modulos:
+Adaptadores publicados a otros contextos:
 - `ConsultaVentasParaReportesAdapter`
-  - implementa `reportes/domain/ports/IConsultaVentasParaReportes`
 - `RegistroLeadCaptacionVentasAdapter`
-  - implementa `integraciones/domain/ports/IRegistroLeadCaptacion`
 
-Notas:
-- `ventas` usa sesion tecnica compartida.
-- `ListarLeadsUseCase` no consume puertos desde `auth`.
+Adaptadores primarios:
+- `VentasController`
+- `crearVentasRouter`
 
 ### `reportes`
 
-Responsabilidad:
-- Proyecciones y metricas de lectura para explotacion comercial.
-- Consume ventas mediante un puerto de consulta dedicado.
-
-Casos de uso:
+Use cases:
 - `ObtenerReporteGeneralUseCase`
 - `ObtenerEstadisticasGlobalesUseCase`
+
+Puertos primarios:
+- `IObtenerReporteGeneral`
+- `IObtenerEstadisticasGlobales`
+
+Puertos secundarios:
+- `IConsultaVentasParaReportes`
 
 DTOs:
 - `ReportesSalidaDTOs`
 
-Entidades / modelos de lectura:
+Modelos de lectura:
 - `ReporteGeneral`
 - `EstadisticasGlobales`
 
 Value objects:
 - `PorcentajeConversion`
 
-Puertos secundarios:
-- `IConsultaVentasParaReportes`
-
-Puertos primarios:
-- Router HTTP: `crearReportesRouter`
-- Controller HTTP: `ReportesController`
-- Endpoints:
-  - `GET /reportes/estadisticas-globales`
-  - `GET /reportes/general`
+Adaptadores primarios:
+- `ReportesController`
+- `crearReportesRouter`
 
 Adaptadores secundarios:
-- El adapter concreto viene desde composicion raiz:
-  - `ConsultaVentasParaReportesAdapter` en `ventas`
-
-Notas:
-- La autenticacion usa sesion compartida.
-- La restriccion de rol admin entra por `requireRolesMiddleware(["ADMIN"])`.
+- El adapter concreto se compone desde `ventas`: `ConsultaVentasParaReportesAdapter`
 
 ### `integraciones`
 
-Responsabilidad:
-- Ingreso de eventos externos de captacion.
-- Normalizacion del webhook de WhatsApp antes de delegar a ventas.
-
-Casos de uso:
+Use cases:
+- `ProcesarCaptacionEntranteUseCase`
 - `ProcesarWhatsAppWebhookUseCase`
 
-DTOs:
-- `EntradaWhatsAppWebhook`
-- `SalidaWhatsAppWebhook`
-
-Entidades:
-- `CaptacionWhatsApp`
-
-Value objects:
-- No hay VOs dedicados aun.
+Puertos primarios:
+- `IProcesarCaptacionEntrante`
+- `IProcesarWhatsAppWebhook`
 
 Puertos secundarios:
 - `IRegistroLeadCaptacion`
 
-Puertos primarios:
-- Router HTTP: `crearIntegracionesRouter`
-- Controller HTTP: `IntegracionesController`
-- Endpoints:
-  - `POST /integraciones/webhooks/whatsapp`
+DTOs:
+- `CaptacionEntranteDTO`
+- `EntradaWhatsAppWebhookDTO`
+- `CaptacionProcesadaDTO`
+
+Entidades:
+- `Captacion`
+- `CaptacionWhatsApp`
+
+Value objects:
+- `CanalCaptacion`
+- `OrigenCaptacion`
+- `DatosContactoCaptacion`
+
+Adaptadores primarios:
+- `IntegracionesController`
+- `crearIntegracionesRouter`
+
+Entradas HTTP actuales:
+- `POST /integraciones/captaciones`
+- `POST /integraciones/webhooks/whatsapp`
 
 Adaptadores secundarios:
-- El adapter concreto viene desde composicion raiz:
-  - `RegistroLeadCaptacionVentasAdapter` en `ventas`
+- El adapter concreto se compone desde `ventas`: `RegistroLeadCaptacionVentasAdapter`
 
-Notas:
-- El webhook no inventa un email como identidad del sistema.
-- Si se genera email provisional, se trata explicitamente como dato de contacto externo.
-
-## Comunicacion entre modulos
+## Comunicaciones entre modulos
 
 ### `usuarios -> auth`
-
-Tipo:
-- Adaptador saliente desde `usuarios/infrastructure`
-
-Contrato:
-- `auth/domain/ports/IConsultaCredencialesUsuario`
-- `auth/domain/ports/IVerificadorDeClave`
-
-Implementaciones:
-- `ConsultaCredencialesUsuarioAdapter`
-- `VerificadorDeClavePbkdf2Adapter`
-
-Motivo:
-- `auth` necesita leer credenciales y verificar clave sin importar `usuarios/domain`.
+- `usuarios` implementa puertos secundarios definidos por `auth`.
+- Contratos:
+  - `IConsultaCredencialesUsuario`
+  - `IVerificadorDeClave`
+- Implementaciones:
+  - `ConsultaCredencialesUsuarioAdapter`
+  - `VerificadorDeClavePbkdf2Adapter`
 
 ### `ventas -> reportes`
-
-Tipo:
-- Adaptador saliente desde `ventas/infrastructure/adapters`
-
-Contrato:
-- `reportes/domain/ports/IConsultaVentasParaReportes`
-
-Implementacion:
-- `ConsultaVentasParaReportesAdapter`
-
-Motivo:
-- `reportes` consume solo datos de lectura y no entidades internas de `ventas`.
+- `ventas` implementa el puerto de lectura `IConsultaVentasParaReportes`.
+- Implementacion:
+  - `ConsultaVentasParaReportesAdapter`
+- `reportes` no importa entidades internas de `ventas`; consume solo el contrato de lectura.
 
 ### `ventas -> integraciones`
+- `ventas` implementa el puerto `IRegistroLeadCaptacion`.
+- Implementacion:
+  - `RegistroLeadCaptacionVentasAdapter`
+- `integraciones` normaliza entradas multicanal y delega el alta comercial a `ventas`.
 
-Tipo:
-- Adaptador saliente desde `ventas/infrastructure/adapters`
-
-Contrato:
-- `integraciones/domain/ports/IRegistroLeadCaptacion`
-
-Implementacion:
-- `RegistroLeadCaptacionVentasAdapter`
-
-Motivo:
-- `integraciones` entrega leads normalizados sin conocer el dominio interno de `ventas`.
-
-### `shared -> todos los modulos protegidos`
-
-Tipo:
-- Capacidad transversal tecnica
-
-Contrato:
-- `SessionClaims`
-- `verifySessionMiddleware`
-- `requireRolesMiddleware`
-
-Consumidores actuales:
-- `propiedades`
-- `ventas`
-- `reportes`
-
-Motivo:
-- Separar autenticacion tecnica de autorizacion de negocio.
+### `shared -> modulos protegidos`
+- `shared` provee la capacidad transversal de sesion tecnica:
+  - `SessionClaims`
+  - `verifySessionMiddleware`
+  - `requireRolesMiddleware`
+- Consumidores actuales:
+  - `propiedades`
+  - `ventas`
+  - `reportes`
 
 ## Estructura final
 
@@ -410,6 +367,7 @@ apps/api/src/lib
 ├── auth
 │   ├── application
 │   │   ├── dto
+│   │   ├── ports/in
 │   │   └── use-cases
 │   ├── domain
 │   │   ├── entities
@@ -421,14 +379,19 @@ apps/api/src/lib
 │       └── security
 ├── integraciones
 │   ├── application
+│   │   ├── dto
+│   │   ├── ports/in
 │   │   └── use-cases
 │   ├── domain
 │   │   ├── entities
-│   │   └── ports
+│   │   ├── ports
+│   │   └── value-objects
 │   └── infrastructure
 │       └── http
 ├── propiedades
 │   ├── application
+│   │   ├── dto
+│   │   ├── ports/in
 │   │   └── use-cases
 │   ├── domain
 │   │   ├── entities
@@ -442,6 +405,7 @@ apps/api/src/lib
 ├── reportes
 │   ├── application
 │   │   ├── dto
+│   │   ├── ports/in
 │   │   └── use-cases
 │   ├── domain
 │   │   ├── entities
@@ -463,6 +427,7 @@ apps/api/src/lib
 ├── usuarios
 │   ├── application
 │   │   ├── dto
+│   │   ├── ports/in
 │   │   └── use-cases
 │   ├── domain
 │   │   ├── entities
@@ -477,6 +442,7 @@ apps/api/src/lib
 └── ventas
     ├── application
     │   ├── dto
+    │   ├── ports/in
     │   └── use-cases
     ├── domain
     │   ├── entities
@@ -494,6 +460,8 @@ apps/api/src/lib
 
 - `auth` no debe volver a importar `usuarios/domain`.
 - `propiedades`, `ventas` y `reportes` no deben importar puertos o middlewares desde `auth`.
-- La autorizacion de negocio debe vivir en puertos propios por contexto.
-- `email` en `ventas` e `integraciones` es dato de contacto externo.
+- La autorizacion de negocio vive en puertos secundarios propios por contexto.
+- `reportes` es un contexto de lectura, no un modulo transaccional.
+- `integraciones` es un contexto de captacion multicanal; WhatsApp es solo un canal/adaptador.
 - `username` es la identidad de login interna.
+- `email` en `ventas` e `integraciones` se trata como dato externo de contacto, no identidad interna.

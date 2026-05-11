@@ -9,6 +9,7 @@ import { type IPropiedadRepository } from "../../domain/ports";
 import { Propiedad } from "../../domain/entities";
 import { idUsuarioRef } from "../../domain/value-objects";
 import { type IAutorizadorPropiedades } from "../../domain/ports";
+import { type IListarPropiedades } from "../ports/in";
 
 export type ListarPropiedadesInput = {
   usuarioAutenticado: {
@@ -20,7 +21,9 @@ export type ListarPropiedadesInput = {
 export class ListarPropiedadesUseCase implements CasoDeUso<
   ListarPropiedadesInput,
   Resultado<Propiedad[], ErrorDeDominio>
-> {
+>,
+  IListarPropiedades
+{
   constructor(
     private readonly propiedadRepository: IPropiedadRepository,
     private readonly autorizador: IAutorizadorPropiedades,

@@ -10,6 +10,7 @@ import { Contrato } from "../../domain/entities/Contrato";
 import { type CrearContratoInputDTO } from "../dto/ContratoDTOs";
 import { type ContratoOutputDTO } from "../dto/ContratoDTOs";
 import { idContrato, idCliente, idPropiedad } from "../../domain/value-objects/Ids";
+import { type ICrearContrato } from "../ports/in";
 
 export type CrearContratoInput = CrearContratoInputDTO;
 export type CrearContratoOutput = ContratoOutputDTO;
@@ -17,7 +18,9 @@ export type CrearContratoOutput = ContratoOutputDTO;
 export class CrearContratoUseCase implements CasoDeUso<
   CrearContratoInput,
   Resultado<CrearContratoOutput, ErrorDeDominio>
-> {
+>,
+  ICrearContrato
+{
   constructor(private readonly repository: IContratoRepository) {}
 
   async ejecutar(

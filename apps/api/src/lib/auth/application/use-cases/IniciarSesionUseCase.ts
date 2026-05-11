@@ -7,6 +7,7 @@ import {
 import { ErrorDeDominio } from "../../../shared/domain";
 import { CredencialesInvalidasError, Sesion } from "../../domain";
 import { type SesionAutenticadaDTO } from "../dto";
+import { type IIniciarSesion } from "../ports/in";
 import {
   type IConsultaCredencialesUsuario,
   type ITokenProvider,
@@ -21,7 +22,9 @@ export type IniciarSesionInput = {
 export class IniciarSesionUseCase implements CasoDeUso<
   IniciarSesionInput,
   Resultado<SesionAutenticadaDTO, ErrorDeDominio>
-> {
+>,
+  IIniciarSesion
+{
   constructor(
     private readonly consultaCredenciales: IConsultaCredencialesUsuario,
     private readonly verificadorDeClave: IVerificadorDeClave,

@@ -2,17 +2,23 @@ import { type Context } from "hono";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type D1DatabaseLike, type SessionClaims } from "../../../shared/infrastructure";
 import {
-  RegistrarLeadUseCase,
-  AgendarCitaUseCase,
-  ConvertirLeadAClienteUseCase,
-  RegistrarClienteDirectoUseCase,
-  ActualizarLeadUseCase,
-  ActualizarCitaUseCase,
-  EvaluarLeadParaAsignarUseCase,
+  type IActualizarCita,
+  type IActualizarCliente,
+  type IActualizarLead,
+  type IAgendarCita,
+  type IConvertirLeadACliente,
+  type IListarLeadsPorAsesor,
+  type IRegistrarClienteDirecto,
+  type IRegistrarLead,
 } from "../../application";
-import { D1VentasRepository } from "../persistence/D1VentasRepository";
-import { UuidGeneradorId } from "../../../shared/infrastructure/security/UuidGeneradorId";
-import { idUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
+import {
+  type ActualizarCitaBodyDTO,
+  type ActualizarLeadBodyDTO,
+  type AgendarCitaInputDTO,
+  type ConvertirLeadInputDTO,
+  type RegistrarLeadInputDTO,
+} from "../../application/dto/LeadDTOs";
+import { type RegistrarClienteDirectoInputDTO } from "../../application/dto/ClienteDTOs";
 
 export type BindingsVentas = {
   DB: D1DatabaseLike;
@@ -24,7 +30,20 @@ type AppVariables = {
 
 type ContextoVentas = Context<{ Bindings: BindingsVentas; Variables: AppVariables }>;
 
+export type VentasControllerDeps = Readonly<{
+  crearRegistrarLead: (c: ContextoVentas) => IRegistrarLead;
+  crearAgendarCita: (c: ContextoVentas) => IAgendarCita;
+  crearRegistrarClienteDirecto: (c: ContextoVentas) => IRegistrarClienteDirecto;
+  crearConvertirLeadACliente: (c: ContextoVentas) => IConvertirLeadACliente;
+  crearActualizarLead: (c: ContextoVentas) => IActualizarLead;
+  crearActualizarCita: (c: ContextoVentas) => IActualizarCita;
+  crearListarLeadsPorAsesor: (c: ContextoVentas) => IListarLeadsPorAsesor;
+  crearActualizarCliente?: (c: ContextoVentas) => IActualizarCliente;
+}>;
+
 export class VentasController {
+  constructor(private readonly deps: VentasControllerDeps) {}
+
   private jsonDominioFallo(
     c: ContextoVentas,
     error: ErrorDeDominio,
@@ -35,19 +54,9 @@ export class VentasController {
 
   async registrarLead(c: ContextoVentas): Promise<Response> {
     try {
-      const body = await c.req.json<{
-        nombre: string;
-        email: string;
-        telefono: string;
-        tipo: string;
-        idPropiedadInteres?: string;
-        idAsesor?: string;
-      }>();
+      const body = await c.req.json<RegistrarLeadInputDTO>();
       const authPayload = c.get("authPayload");
-      const repo = new D1VentasRepository(c.env.DB);
-      const generadorId = new UuidGeneradorId();
-      const evaluador = new EvaluarLeadParaAsignarUseCase(repo);
-      const useCase = new RegistrarLeadUseCase(repo, generadorId, evaluador);
+      const useCase = this.deps.crearRegistrarLead(c);
 
       const resultado = await useCase.ejecutar({
         ...body,
@@ -70,16 +79,8 @@ export class VentasController {
 
   async agendarCita(c: ContextoVentas): Promise<Response> {
     try {
-      const body = await c.req.json<{
-        idLead: string;
-        idPropiedad?: string;
-        fechaInicio: string;
-        duracionMinutos: number;
-        observacion?: string;
-      }>();
-      const repo = new D1VentasRepository(c.env.DB);
-      const generadorId = new UuidGeneradorId();
-      const useCase = new AgendarCitaUseCase(repo, generadorId);
+      const body = await c.req.json<AgendarCitaInputDTO>();
+      const useCase = this.deps.crearAgendarCita(c);
 
       const resultado = await useCase.ejecutar({
         ...body,
@@ -102,11 +103,9 @@ export class VentasController {
 
   async registrarClienteDirecto(c: ContextoVentas): Promise<Response> {
     try {
-      const body = await c.req.json<{ nombre: string; email: string; telefono: string }>();
+      const body = await c.req.json<RegistrarClienteDirectoInputDTO>();
       const authPayload = c.get("authPayload");
-      const repo = new D1VentasRepository(c.env.DB);
-      const generadorId = new UuidGeneradorId();
-      const useCase = new RegistrarClienteDirectoUseCase(repo, generadorId);
+      const useCase = this.deps.crearRegistrarClienteDirecto(c);
 
       const resultado = await useCase.ejecutar({
         ...body,
@@ -129,12 +128,9 @@ export class VentasController {
 
   async convertirACliente(c: ContextoVentas): Promise<Response> {
     try {
-      const { idLead } = await c.req.json<{ idLead: string }>();
-      const repo = new D1VentasRepository(c.env.DB);
-      const generadorId = new UuidGeneradorId();
-      const useCase = new ConvertirLeadAClienteUseCase(repo, generadorId);
-
-      const resultado = await useCase.ejecutar({ idLead });
+      const body = await c.req.json<ConvertirLeadInputDTO>();
+      const useCase = this.deps.crearConvertirLeadACliente(c);
+      const resultado = await useCase.ejecutar(body);
 
       if (!resultado.esExito) {
         return this.jsonDominioFallo(c, resultado.error);
@@ -153,14 +149,8 @@ export class VentasController {
   async editarLead(c: ContextoVentas): Promise<Response> {
     try {
       const id = c.req.param("id") ?? "";
-      const body = await c.req.json<{
-        nombre?: string;
-        email?: string;
-        telefono?: string;
-        tipo?: string;
-      }>();
-      const repo = new D1VentasRepository(c.env.DB);
-      const useCase = new ActualizarLeadUseCase(repo);
+      const body = await c.req.json<ActualizarLeadBodyDTO>();
+      const useCase = this.deps.crearActualizarLead(c);
 
       const resultado = await useCase.ejecutar({ id, ...body });
 
@@ -182,13 +172,8 @@ export class VentasController {
     try {
       const idLead = c.req.param("idLead") ?? "";
       const idCita = c.req.param("idCita") ?? "";
-      const body = await c.req.json<{
-        fechaInicio?: string;
-        duracionMinutos?: number;
-        observacion?: string;
-      }>();
-      const repo = new D1VentasRepository(c.env.DB);
-      const useCase = new ActualizarCitaUseCase(repo);
+      const body = await c.req.json<ActualizarCitaBodyDTO>();
+      const useCase = this.deps.crearActualizarCita(c);
 
       const resultado = await useCase.ejecutar({
         idLead,
@@ -214,9 +199,14 @@ export class VentasController {
   async listarPipeline(c: ContextoVentas): Promise<Response> {
     try {
       const authPayload = c.get("authPayload");
-      const repo = new D1VentasRepository(c.env.DB);
+      const useCase = this.deps.crearListarLeadsPorAsesor(c);
+      const resultado = await useCase.ejecutar({ idAsesor: authPayload.idUsuario });
 
-      const leads = await repo.listarLeadsPorAsesor(idUsuarioRef(authPayload.idUsuario));
+      if (!resultado.esExito) {
+        return this.jsonDominioFallo(c, resultado.error);
+      }
+
+      const leads = resultado.valor;
 
       return c.json({
         success: true,

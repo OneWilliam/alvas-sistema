@@ -10,6 +10,7 @@ import { Lead } from "../../domain/entities/Lead";
 import { idUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
 import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
 import { EvaluarLeadParaAsignarUseCase } from "./EvaluarLeadParaAsignarUseCase";
+import { type IRegistrarLead } from "../ports/in";
 
 export type RegistrarLeadInput = {
   nombre: string;
@@ -23,7 +24,9 @@ export type RegistrarLeadInput = {
 export class RegistrarLeadUseCase implements CasoDeUso<
   RegistrarLeadInput,
   Resultado<Lead, ErrorDeDominio>
-> {
+>,
+  IRegistrarLead
+{
   constructor(
     private readonly repository: IVentasRepository,
     private readonly generadorId: IGeneradorId,

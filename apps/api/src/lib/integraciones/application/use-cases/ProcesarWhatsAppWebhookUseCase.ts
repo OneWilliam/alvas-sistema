@@ -7,35 +7,31 @@ import {
 import { ErrorDeDominio } from "../../../shared/domain";
 import { CaptacionWhatsApp } from "../../domain";
 import { type IRegistroLeadCaptacion } from "../../domain/ports/IRegistroLeadCaptacion";
-
-export type EntradaWhatsAppWebhook = Readonly<{
-  wa_id: string;
-  wa_name: string;
-  pregunta_tipo?: string;
-  propiedad_id?: string;
-}>;
-
-export type SalidaWhatsAppWebhook = Readonly<{
-  idLead: string;
-}>;
+import { type EntradaWhatsAppWebhookDTO, type CaptacionProcesadaDTO } from "../dto/CaptacionDTOs";
+import { type IProcesarWhatsAppWebhook } from "../ports/in";
 
 export class ProcesarWhatsAppWebhookUseCase implements CasoDeUso<
-  EntradaWhatsAppWebhook,
-  Resultado<SalidaWhatsAppWebhook, ErrorDeDominio>
-> {
+  EntradaWhatsAppWebhookDTO,
+  Resultado<CaptacionProcesadaDTO, ErrorDeDominio>
+>,
+  IProcesarWhatsAppWebhook
+{
   constructor(private readonly registroLead: IRegistroLeadCaptacion) {}
 
   async ejecutar(
-    input: EntradaWhatsAppWebhook,
-  ): Promise<Resultado<SalidaWhatsAppWebhook, ErrorDeDominio>> {
+    input: EntradaWhatsAppWebhookDTO,
+  ): Promise<Resultado<CaptacionProcesadaDTO, ErrorDeDominio>> {
     try {
-      const captacion = CaptacionWhatsApp.crear(input);
+      const captacion = CaptacionWhatsApp.crear(input).aCaptacion();
       const resultado = await this.registroLead.registrar({
-        nombre: captacion.nombre,
-        email: captacion.emailDeContactoProvisional,
-        telefono: captacion.telefono,
+        canal: captacion.canal.valor,
+        origen: captacion.origen.valor,
+        nombre: captacion.contacto.nombre,
+        email: captacion.emailDeContacto,
+        telefono: captacion.contacto.telefono,
         tipo: captacion.tipo,
         idPropiedadInteres: captacion.idPropiedadInteres,
+        metadata: captacion.metadata,
       });
 
       if (!resultado.esExito) {

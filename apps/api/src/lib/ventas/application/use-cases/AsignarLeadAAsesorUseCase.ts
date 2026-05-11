@@ -10,6 +10,7 @@ import { idLead } from "../../domain/value-objects/Ids";
 import { LeadNoEncontradoError } from "../../domain/errors";
 import { idUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
 import { type AsignarLeadAAsesorInputDTO } from "../dto/LeadDTOs";
+import { type IAsignarLeadAAsesor } from "../ports/in";
 
 export type AsignarLeadAAsesorInput = AsignarLeadAAsesorInputDTO;
 export type AsignarLeadAAsesorOutput = void;
@@ -17,7 +18,9 @@ export type AsignarLeadAAsesorOutput = void;
 export class AsignarLeadAAsesorUseCase implements CasoDeUso<
   AsignarLeadAAsesorInput,
   Resultado<AsignarLeadAAsesorOutput, ErrorDeDominio>
-> {
+>,
+  IAsignarLeadAAsesor
+{
   constructor(private readonly repository: IVentasRepository) {}
 
   async ejecutar(

@@ -5,6 +5,7 @@ import { Lead } from "../../domain/entities/Lead";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type IAutorizadorVentas } from "../../domain/ports/IAutorizadorVentas";
 import { idUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
+import { type IListarLeads } from "../ports/in";
 
 export type ListarLeadsInput = {
   idUsuarioEjecutor: string;
@@ -16,7 +17,9 @@ export type ListarLeadsOutput = Lead[];
 export class ListarLeadsUseCase implements CasoDeUso<
   ListarLeadsInput,
   Resultado<ListarLeadsOutput, ErrorDeDominio>
-> {
+>,
+  IListarLeads
+{
   constructor(
     private readonly ventasRepository: IVentasRepository,
     private readonly autorizador: IAutorizadorVentas,

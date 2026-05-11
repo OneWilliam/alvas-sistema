@@ -10,6 +10,7 @@ import { idUsuarioRef } from "../../domain/value-objects";
 import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
 import { type IAutorizadorPropiedades } from "../../domain/ports";
 import { PropiedadError } from "../../domain/errors/PropiedadError";
+import { type ICrearPropiedad } from "../ports/in";
 
 export type CrearPropiedadInput = {
   titulo: string;
@@ -25,7 +26,9 @@ export type CrearPropiedadInput = {
 export class CrearPropiedadUseCase implements CasoDeUso<
   CrearPropiedadInput,
   Resultado<Propiedad, PropiedadError>
-> {
+>,
+  ICrearPropiedad
+{
   constructor(
     private readonly propiedadRepository: IPropiedadRepository,
     private readonly generadorId: IGeneradorId,

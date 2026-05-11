@@ -5,6 +5,12 @@ export interface ActualizarClienteInputDTO {
   telefono?: string;
 }
 
+export interface RegistrarClienteDirectoInputDTO {
+  nombre: string;
+  email: string;
+  telefono: string;
+}
+
 export interface ClienteOutputDTO {
   id: string;
   nombre: string;

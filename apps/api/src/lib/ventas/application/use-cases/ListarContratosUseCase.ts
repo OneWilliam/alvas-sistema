@@ -7,6 +7,7 @@ import {
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type IContratoRepository } from "../../domain/ports/IContratoRepository";
 import { type ListarContratosOutputDTO } from "../dto/ContratoDTOs";
+import { type IListarContratos } from "../ports/in";
 
 export type ListarContratosInput = void;
 export type ListarContratosOutput = ListarContratosOutputDTO;
@@ -14,7 +15,9 @@ export type ListarContratosOutput = ListarContratosOutputDTO;
 export class ListarContratosUseCase implements CasoDeUso<
   ListarContratosInput,
   Resultado<ListarContratosOutput, ErrorDeDominio>
-> {
+>,
+  IListarContratos
+{
   constructor(private readonly repository: IContratoRepository) {}
 
   async ejecutar(): Promise<Resultado<ListarContratosOutput, ErrorDeDominio>> {

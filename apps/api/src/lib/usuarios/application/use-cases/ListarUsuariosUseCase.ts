@@ -7,6 +7,7 @@ import {
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type IUsuarioRepository } from "../../domain/ports/IUsuarioRepository";
 import { type UsuarioListadoOutputDTO } from "../dto/UsuarioListadoDTOs";
+import { type IListarUsuarios } from "../ports/in";
 
 export type ListarUsuariosInput = void;
 export type ListarUsuariosOutput = UsuarioListadoOutputDTO[];
@@ -14,7 +15,9 @@ export type ListarUsuariosOutput = UsuarioListadoOutputDTO[];
 export class ListarUsuariosUseCase implements CasoDeUso<
   ListarUsuariosInput,
   Resultado<ListarUsuariosOutput, ErrorDeDominio>
-> {
+>,
+  IListarUsuarios
+{
   constructor(private readonly usuarioRepository: IUsuarioRepository) {}
 
   async ejecutar(): Promise<Resultado<ListarUsuariosOutput, ErrorDeDominio>> {

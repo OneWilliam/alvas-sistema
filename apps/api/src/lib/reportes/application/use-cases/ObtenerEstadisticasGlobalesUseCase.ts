@@ -8,11 +8,14 @@ import { ErrorDeDominio } from "../../../shared/domain/errors/ErrorDeDominio";
 import { EstadisticasGlobales } from "../../domain";
 import { type IConsultaVentasParaReportes } from "../../domain/ports/IConsultaVentasParaReportes";
 import { type EstadisticasGlobalesOutput } from "../dto/ReportesSalidaDTOs";
+import { type IObtenerEstadisticasGlobales } from "../ports/in";
 
 export class ObtenerEstadisticasGlobalesUseCase implements CasoDeUso<
   void,
   Resultado<EstadisticasGlobalesOutput, ErrorDeDominio>
-> {
+>,
+  IObtenerEstadisticasGlobales
+{
   constructor(private readonly consultaVentas: IConsultaVentasParaReportes) {}
 
   async ejecutar(): Promise<Resultado<EstadisticasGlobalesOutput, ErrorDeDominio>> {

@@ -2,8 +2,24 @@ export interface ObtenerLeadInputDTO {
   id: string;
 }
 
+export interface RegistrarLeadInputDTO {
+  nombre: string;
+  email: string;
+  telefono: string;
+  tipo: string;
+  idPropiedadInteres?: string;
+  idAsesor?: string;
+}
+
 export interface ActualizarLeadInputDTO {
   id: string;
+  nombre?: string;
+  email?: string;
+  telefono?: string;
+  tipo?: string;
+}
+
+export interface ActualizarLeadBodyDTO {
   nombre?: string;
   email?: string;
   telefono?: string;
@@ -29,9 +45,30 @@ export interface ObtenerCitaPorIdInputDTO {
   idCita: string;
 }
 
-export interface ActualizarClienteInputDTO {
-  idUsuario: string;
-  nombre?: string;
-  email?: string;
-  telefono?: string;
+export interface AgendarCitaInputDTO {
+  idLead: string;
+  idPropiedad?: string;
+  fechaInicio: string;
+  duracionMinutos: number;
+  observacion?: string;
+}
+
+export interface ActualizarCitaInputDTO {
+  idLead: string;
+  idCita: string;
+  fechaInicio?: string;
+  duracionMinutos?: number;
+  observacion?: string;
+  estado?: string;
+}
+
+export interface ActualizarCitaBodyDTO {
+  fechaInicio?: string;
+  duracionMinutos?: number;
+  observacion?: string;
+  estado?: string;
+}
+
+export interface ConvertirLeadInputDTO {
+  idLead: string;
 }

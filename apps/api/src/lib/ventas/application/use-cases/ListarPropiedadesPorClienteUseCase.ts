@@ -3,6 +3,7 @@ import { resultadoExitoso, resultadoFallido, type Resultado } from "../../../sha
 import { type IContratoRepository } from "../../domain/ports/IContratoRepository";
 import { idCliente, type IdPropiedad } from "../../domain/value-objects/Ids";
 import { ErrorDeDominio } from "../../../shared/domain";
+import { type IListarPropiedadesPorCliente } from "../ports/in";
 
 export type ListarPropiedadesPorClienteInput = {
   idCliente: string;
@@ -13,7 +14,9 @@ export type ListarPropiedadesPorClienteOutput = IdPropiedad[];
 export class ListarPropiedadesPorClienteUseCase implements CasoDeUso<
   ListarPropiedadesPorClienteInput,
   Resultado<ListarPropiedadesPorClienteOutput, ErrorDeDominio>
-> {
+>,
+  IListarPropiedadesPorCliente
+{
   constructor(private readonly contratoRepository: IContratoRepository) {}
 
   async ejecutar(

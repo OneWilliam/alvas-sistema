@@ -5,6 +5,7 @@ import { Cliente } from "../../domain/entities/Cliente";
 import { idCliente } from "../../domain/value-objects/Ids";
 import { ClienteNoEncontradoError } from "../../domain/errors/DomainErrors";
 import { ErrorDeDominio } from "../../../shared/domain";
+import { type IObtenerCliente } from "../ports/in";
 
 export type ObtenerClienteInput = {
   id: string;
@@ -13,7 +14,9 @@ export type ObtenerClienteInput = {
 export class ObtenerClienteUseCase implements CasoDeUso<
   ObtenerClienteInput,
   Resultado<Cliente, ErrorDeDominio>
-> {
+>,
+  IObtenerCliente
+{
   constructor(private readonly ventasRepository: IVentasRepository) {}
 
   async ejecutar(input: ObtenerClienteInput): Promise<Resultado<Cliente, ErrorDeDominio>> {

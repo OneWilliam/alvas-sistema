@@ -6,7 +6,8 @@ import {
 } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
-import { idLead } from "../../domain/value-objects/Ids";
+import { idCita, idLead } from "../../domain/value-objects/Ids";
+import { type IActualizarCita } from "../ports/in";
 
 export type ActualizarCitaInput = {
   idLead: string;
@@ -20,7 +21,9 @@ export type ActualizarCitaInput = {
 export class ActualizarCitaUseCase implements CasoDeUso<
   ActualizarCitaInput,
   Resultado<void, ErrorDeDominio>
-> {
+>,
+  IActualizarCita
+{
   constructor(private readonly repository: IVentasRepository) {}
 
   async ejecutar(input: ActualizarCitaInput): Promise<Resultado<void, ErrorDeDominio>> {
@@ -31,20 +34,25 @@ export class ActualizarCitaUseCase implements CasoDeUso<
           new ErrorDeDominio("Lead no encontrado", { codigo: "LEAD_NOT_FOUND" }),
         );
 
-      const cita = lead.citas.find((c) => (c.id as string) === input.idCita);
-      if (!cita)
+      if (!lead.obtenerCitaPorId(idCita(input.idCita))) {
         return resultadoFallido(
           new ErrorDeDominio("Cita no encontrada", { codigo: "CITA_NOT_FOUND" }),
         );
+      }
 
-      // Aquí deberíamos agregar lógica de actualización en la entidad Cita
-      // Como simplificación para este MVP, asumimos que el repositorio maneja el update
+      lead.actualizarCita({
+        idCita: idCita(input.idCita),
+        fechaInicio: input.fechaInicio,
+        duracionMinutos: input.duracionMinutos,
+        observacion: input.observacion,
+        estado: input.estado,
+      });
 
       await this.repository.guardarLead(lead);
       await this.repository.registrarActividad(
         lead.id,
         "CITA_ACTUALIZADA",
-        `Cita ${input.idCita} actualizada`,
+        `Cita ${input.idCita} actualizada desde el agregado.`,
       );
 
       return resultadoExitoso(undefined);

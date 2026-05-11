@@ -9,6 +9,7 @@ import { type IUsuarioRepository } from "../../domain/ports/IUsuarioRepository";
 import { IdUsuario } from "../../domain/value-objects";
 import { UsuarioNoEncontradoError } from "../../domain/errors/UsuarioNoEncontradoError";
 import { type UsuarioOutputDTO } from "../dto/UsuarioActualizacionDTOs";
+import { type IObtenerUsuario } from "../ports/in";
 
 export type ObtenerUsuarioInput = {
   idUsuario: string;
@@ -18,7 +19,9 @@ export type ObtenerUsuarioOutput = UsuarioOutputDTO;
 export class ObtenerUsuarioUseCase implements CasoDeUso<
   ObtenerUsuarioInput,
   Resultado<ObtenerUsuarioOutput, ErrorDeDominio>
-> {
+>,
+  IObtenerUsuario
+{
   constructor(private readonly usuarioRepository: IUsuarioRepository) {}
 
   async ejecutar(

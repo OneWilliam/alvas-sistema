@@ -9,6 +9,7 @@ import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { Cliente } from "../../domain/entities/Cliente";
 import { idLead, idCliente } from "../../domain/value-objects/Ids";
 import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
+import { type IConvertirLeadACliente } from "../ports/in";
 
 export type ConvertirLeadAClienteInput = {
   idLead: string;
@@ -17,7 +18,9 @@ export type ConvertirLeadAClienteInput = {
 export class ConvertirLeadAClienteUseCase implements CasoDeUso<
   ConvertirLeadAClienteInput,
   Resultado<Cliente, ErrorDeDominio>
-> {
+>,
+  IConvertirLeadACliente
+{
   constructor(
     private readonly repository: IVentasRepository,
     private readonly generadorId: IGeneradorId,

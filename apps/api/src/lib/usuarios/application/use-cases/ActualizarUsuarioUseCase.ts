@@ -9,6 +9,7 @@ import { type IUsuarioRepository } from "../../domain/ports/IUsuarioRepository";
 import { IdUsuario } from "../../domain/value-objects";
 import { type ActualizarUsuarioInputDTO } from "../dto/UsuarioActualizacionDTOs";
 import { type UsuarioOutputDTO } from "../dto/UsuarioActualizacionDTOs";
+import { type IActualizarUsuario } from "../ports/in";
 
 export type ActualizarUsuarioInput = ActualizarUsuarioInputDTO;
 export type ActualizarUsuarioOutput = UsuarioOutputDTO;
@@ -16,7 +17,9 @@ export type ActualizarUsuarioOutput = UsuarioOutputDTO;
 export class ActualizarUsuarioUseCase implements CasoDeUso<
   ActualizarUsuarioInput,
   Resultado<ActualizarUsuarioOutput, ErrorDeDominio>
-> {
+>,
+  IActualizarUsuario
+{
   constructor(private readonly usuarioRepository: IUsuarioRepository) {}
 
   async ejecutar(

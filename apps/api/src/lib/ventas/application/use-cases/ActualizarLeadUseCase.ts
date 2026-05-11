@@ -7,6 +7,7 @@ import {
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { idLead } from "../../domain/value-objects/Ids";
+import { type IActualizarLead } from "../ports/in";
 
 export type ActualizarLeadInput = {
   id: string;
@@ -19,7 +20,9 @@ export type ActualizarLeadInput = {
 export class ActualizarLeadUseCase implements CasoDeUso<
   ActualizarLeadInput,
   Resultado<void, ErrorDeDominio>
-> {
+>,
+  IActualizarLead
+{
   constructor(private readonly repository: IVentasRepository) {}
 
   async ejecutar(input: ActualizarLeadInput): Promise<Resultado<void, ErrorDeDominio>> {
@@ -30,15 +33,18 @@ export class ActualizarLeadUseCase implements CasoDeUso<
           new ErrorDeDominio("Lead no encontrado", { codigo: "LEAD_NOT_FOUND" }),
         );
 
-      // Actualizar solo campos proporcionados manteniendo integridad del agregado
-      // Nota: En un modelo DDD, esto idealmente se haría mediante métodos específicos del dominio
-      // si hubiera reglas de negocio (ej: no cambiar email si ya está convertido).
+      lead.actualizarDatos({
+        nombre: input.nombre,
+        email: input.email,
+        telefono: input.telefono,
+        tipo: input.tipo,
+      });
 
       await this.repository.guardarLead(lead);
       await this.repository.registrarActividad(
         lead.id,
         "LEAD_ACTUALIZADO",
-        "Datos del lead actualizados",
+        "Datos del lead actualizados desde el agregado.",
       );
 
       return resultadoExitoso(undefined);

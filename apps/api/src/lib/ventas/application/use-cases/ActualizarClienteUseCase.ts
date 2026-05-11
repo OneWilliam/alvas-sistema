@@ -9,6 +9,7 @@ import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { idCliente } from "../../domain/value-objects/Ids";
 import { ClienteNoEncontradoError } from "../../domain/errors/DomainErrors";
 import { type ActualizarClienteInputDTO, type ClienteOutputDTO } from "../dto/ClienteDTOs";
+import { type IActualizarCliente } from "../ports/in";
 
 export type ActualizarClienteInput = ActualizarClienteInputDTO;
 export type ActualizarClienteOutput = ClienteOutputDTO;
@@ -16,7 +17,9 @@ export type ActualizarClienteOutput = ClienteOutputDTO;
 export class ActualizarClienteUseCase implements CasoDeUso<
   ActualizarClienteInput,
   Resultado<ActualizarClienteOutput, ErrorDeDominio>
-> {
+>,
+  IActualizarCliente
+{
   constructor(private readonly ventasRepository: IVentasRepository) {}
 
   async ejecutar(

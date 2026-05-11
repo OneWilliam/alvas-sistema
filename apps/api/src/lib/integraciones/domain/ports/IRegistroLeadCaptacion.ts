@@ -2,12 +2,15 @@ import { type Resultado } from "../../../shared";
 import { type ErrorDeDominio } from "../../../shared/domain";
 
 export type RegistroLeadCaptacionInput = Readonly<{
+  canal: string;
+  origen: string;
   nombre: string;
-  email: string;
+  email?: string;
   telefono: string;
   tipo: string;
   idAsesor?: string;
   idPropiedadInteres?: string;
+  metadata?: Readonly<Record<string, string>>;
 }>;
 
 export interface IRegistroLeadCaptacion {

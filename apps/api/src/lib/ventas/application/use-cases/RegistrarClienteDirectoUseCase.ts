@@ -9,6 +9,7 @@ import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { Cliente } from "../../domain/entities/Cliente";
 import { idUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
 import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
+import { type IRegistrarClienteDirecto } from "../ports/in";
 
 export type RegistrarClienteDirectoInput = {
   nombre: string;
@@ -20,7 +21,9 @@ export type RegistrarClienteDirectoInput = {
 export class RegistrarClienteDirectoUseCase implements CasoDeUso<
   RegistrarClienteDirectoInput,
   Resultado<Cliente, ErrorDeDominio>
-> {
+>,
+  IRegistrarClienteDirecto
+{
   constructor(
     private readonly repository: IVentasRepository,
     private readonly generadorId: IGeneradorId,

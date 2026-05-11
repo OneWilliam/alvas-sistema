@@ -10,6 +10,7 @@ import { idLead } from "../../domain/value-objects/Ids";
 import { LeadNoEncontradoError } from "../../domain/errors";
 import { type ObtenerLeadInputDTO } from "../dto/LeadDTOs";
 import { type Lead } from "../../domain/entities/Lead";
+import { type IObtenerLead } from "../ports/in";
 
 export type ObtenerLeadInput = ObtenerLeadInputDTO;
 export type ObtenerLeadOutput = Lead;
@@ -17,7 +18,9 @@ export type ObtenerLeadOutput = Lead;
 export class ObtenerLeadUseCase implements CasoDeUso<
   ObtenerLeadInput,
   Resultado<ObtenerLeadOutput, ErrorDeDominio>
-> {
+>,
+  IObtenerLead
+{
   constructor(private readonly repository: IVentasRepository) {}
 
   async ejecutar(input: ObtenerLeadInput): Promise<Resultado<ObtenerLeadOutput, ErrorDeDominio>> {

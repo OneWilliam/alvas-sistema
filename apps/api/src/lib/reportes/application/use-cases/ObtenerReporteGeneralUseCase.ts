@@ -9,11 +9,14 @@ import { ReporteGeneral } from "../../domain";
 import { type IConsultaVentasParaReportes } from "../../domain/ports/IConsultaVentasParaReportes";
 import { PorcentajeConversion } from "../../domain/value-objects/PorcentajeConversion";
 import { type ReporteGeneralOutput } from "../dto/ReportesSalidaDTOs";
+import { type IObtenerReporteGeneral } from "../ports/in";
 
 export class ObtenerReporteGeneralUseCase implements CasoDeUso<
   void,
   Resultado<ReporteGeneralOutput, ErrorDeDominio>
-> {
+>,
+  IObtenerReporteGeneral
+{
   constructor(private readonly consultaVentas: IConsultaVentasParaReportes) {}
 
   async ejecutar(): Promise<Resultado<ReporteGeneralOutput, ErrorDeDominio>> {

@@ -1,9 +1,7 @@
 import { type Context } from "hono";
 import { type D1DatabaseLike } from "../../../shared/infrastructure";
-import { IniciarSesionUseCase } from "../../application/use-cases/IniciarSesionUseCase";
-import { RenovarSesionUseCase } from "../../application/use-cases/RenovarSesionUseCase";
-import { type IConsultaCredencialesUsuario, type IVerificadorDeClave } from "../../domain/ports";
-import { type ITokenProvider } from "../../domain/ports/ITokenProvider";
+import { type IIniciarSesion, type IRenovarSesion } from "../../application";
+import { type RenovarSesionDTO } from "../../application/dto/AuthRequestDTOs";
 import { type IniciarSesionInput } from "../../application/use-cases/IniciarSesionUseCase";
 
 export type BindingsAuth = {
@@ -16,9 +14,8 @@ export type BindingsAuth = {
 };
 
 export type AuthControllerDeps = Readonly<{
-  crearConsultaCredenciales: (db: D1DatabaseLike) => IConsultaCredencialesUsuario;
-  crearVerificadorDeClave: (pepper?: string) => IVerificadorDeClave;
-  crearTokenProvider: (env: BindingsAuth) => ITokenProvider;
+  crearIniciarSesion: (c: ContextoAuth) => IIniciarSesion;
+  crearRenovarSesion: (c: ContextoAuth) => IRenovarSesion;
 }>;
 
 type ContextoAuth = Context<{ Bindings: BindingsAuth }>;
@@ -29,15 +26,7 @@ export class AuthController {
   async iniciarSesion(c: ContextoAuth): Promise<Response> {
     try {
       const body = await c.req.json<IniciarSesionInput>();
-      const consultaCredenciales = this.deps.crearConsultaCredenciales(c.env.DB);
-      const verificadorDeClave = this.deps.crearVerificadorDeClave(c.env.AUTH_PEPPER);
-      const tokenProvider = this.deps.crearTokenProvider(c.env);
-
-      const useCase = new IniciarSesionUseCase(
-        consultaCredenciales,
-        verificadorDeClave,
-        tokenProvider,
-      );
+      const useCase = this.deps.crearIniciarSesion(c);
       const resultado = await useCase.ejecutar(body);
 
       if (!resultado.esExito) {
@@ -69,12 +58,9 @@ export class AuthController {
 
   async renovarSesion(c: ContextoAuth): Promise<Response> {
     try {
-      const { refreshToken } = await c.req.json<{ refreshToken: string }>();
-      const consultaCredenciales = this.deps.crearConsultaCredenciales(c.env.DB);
-      const tokenProvider = this.deps.crearTokenProvider(c.env);
-
-      const useCase = new RenovarSesionUseCase(consultaCredenciales, tokenProvider);
-      const resultado = await useCase.ejecutar({ refreshToken });
+      const body = await c.req.json<RenovarSesionDTO>();
+      const useCase = this.deps.crearRenovarSesion(c);
+      const resultado = await useCase.ejecutar(body);
 
       if (!resultado.esExito) {
         return c.json(

@@ -7,6 +7,7 @@ import {
 import { ErrorDeDominio } from "../../../shared/domain";
 import { CredencialesInvalidasError, RefreshToken, Sesion } from "../../domain";
 import { type SesionAutenticadaDTO } from "../dto";
+import { type IRenovarSesion } from "../ports/in";
 import { type IConsultaCredencialesUsuario, type ITokenProvider } from "../../domain/ports";
 
 export type RenovarSesionInput = {
@@ -16,7 +17,9 @@ export type RenovarSesionInput = {
 export class RenovarSesionUseCase implements CasoDeUso<
   RenovarSesionInput,
   Resultado<SesionAutenticadaDTO, ErrorDeDominio>
-> {
+>,
+  IRenovarSesion
+{
   constructor(
     private readonly consultaCredenciales: IConsultaCredencialesUsuario,
     private readonly tokenProvider: ITokenProvider,

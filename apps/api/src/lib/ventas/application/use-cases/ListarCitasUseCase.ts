@@ -3,6 +3,7 @@ import { resultadoExitoso, resultadoFallido, type Resultado } from "../../../sha
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { Cita } from "../../domain/entities/Cita";
 import { ErrorDeDominio } from "../../../shared/domain";
+import { type IListarCitas } from "../ports/in";
 
 export type ListarCitasInput = void;
 
@@ -11,7 +12,9 @@ export type ListarCitasOutput = Cita[];
 export class ListarCitasUseCase implements CasoDeUso<
   ListarCitasInput,
   Resultado<ListarCitasOutput, ErrorDeDominio>
-> {
+>,
+  IListarCitas
+{
   constructor(private readonly ventasRepository: IVentasRepository) {}
 
   async ejecutar(): Promise<Resultado<ListarCitasOutput, ErrorDeDominio>> {

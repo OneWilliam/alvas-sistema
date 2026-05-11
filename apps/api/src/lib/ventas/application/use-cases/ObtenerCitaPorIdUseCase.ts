@@ -10,6 +10,7 @@ import { idLead, idCita } from "../../domain/value-objects/Ids";
 import { type Cita } from "../../domain/entities/Cita";
 import { LeadNoEncontradoError, CitaNoEncontradaError } from "../../domain/errors";
 import { type ObtenerCitaPorIdInputDTO } from "../dto/LeadDTOs";
+import { type IObtenerCitaPorId } from "../ports/in";
 
 export type ObtenerCitaPorIdInput = ObtenerCitaPorIdInputDTO;
 export type ObtenerCitaPorIdOutput = Cita;
@@ -17,7 +18,9 @@ export type ObtenerCitaPorIdOutput = Cita;
 export class ObtenerCitaPorIdUseCase implements CasoDeUso<
   ObtenerCitaPorIdInput,
   Resultado<ObtenerCitaPorIdOutput, ErrorDeDominio>
-> {
+>,
+  IObtenerCitaPorId
+{
   constructor(private readonly repository: IVentasRepository) {}
 
   async ejecutar(

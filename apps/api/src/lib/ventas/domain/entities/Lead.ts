@@ -154,4 +154,80 @@ export class Lead {
     this.props.idAsesor = idAsesorNuevo;
     this.props.actualizadoEn = new Date();
   }
+
+  actualizarDatos(params: {
+    nombre?: string;
+    email?: string;
+    telefono?: string;
+    tipo?: string;
+  }): void {
+    if (this.props.estado.estaCerrado()) {
+      throw new ErrorDeValidacion("No se puede actualizar un lead cerrado.");
+    }
+
+    if (params.nombre !== undefined) {
+      const nombre = params.nombre.trim();
+      if (!nombre) {
+        throw new ErrorDeValidacion("El nombre del lead es obligatorio.");
+      }
+      this.props.nombre = nombre;
+    }
+
+    if (params.email !== undefined) {
+      const email = params.email.trim().toLowerCase();
+      if (!email) {
+        throw new ErrorDeValidacion("El email del lead es obligatorio.");
+      }
+      this.props.email = email;
+    }
+
+    if (params.telefono !== undefined) {
+      const telefono = params.telefono.trim();
+      if (!telefono) {
+        throw new ErrorDeValidacion("El telefono del lead es obligatorio.");
+      }
+      this.props.telefono = telefono;
+    }
+
+    if (params.tipo !== undefined) {
+      this.props.tipo = new TipoVenta(params.tipo);
+    }
+
+    this.props.actualizadoEn = new Date();
+  }
+
+  actualizarCita(params: {
+    idCita: IdCita;
+    fechaInicio?: Date;
+    duracionMinutos?: number;
+    observacion?: string;
+    estado?: string;
+  }): void {
+    const cita = this.obtenerCitaPorId(params.idCita);
+
+    if (!cita) {
+      throw new ErrorDeValidacion("La cita no existe en este lead.");
+    }
+
+    const requiereReprogramacion =
+      params.fechaInicio !== undefined || params.duracionMinutos !== undefined;
+
+    if (requiereReprogramacion) {
+      if (!params.fechaInicio || !params.duracionMinutos) {
+        throw new ErrorDeValidacion(
+          "Para reprogramar la cita se requieren fechaInicio y duracionMinutos.",
+        );
+      }
+
+      cita.reprogramar(params.fechaInicio, params.duracionMinutos, params.observacion);
+    } else {
+      if (params.estado !== undefined) {
+        cita.cambiarEstado(params.estado, params.observacion);
+      } else if (params.observacion !== undefined) {
+        cita.actualizarObservacion(params.observacion);
+      }
+    }
+
+    this.props.actualizadoEn = new Date();
+  }
 }

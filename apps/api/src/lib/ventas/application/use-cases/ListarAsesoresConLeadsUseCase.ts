@@ -3,6 +3,7 @@ import { resultadoExitoso, resultadoFallido, type Resultado } from "../../../sha
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { type IdUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
 import { ErrorDeDominio } from "../../../shared/domain";
+import { type IListarAsesoresConLeads } from "../ports/in";
 
 export type ListarAsesoresConLeadsOutput = {
   idAsesor: IdUsuarioRef;
@@ -12,7 +13,9 @@ export type ListarAsesoresConLeadsOutput = {
 export class ListarAsesoresConLeadsUseCase implements CasoDeUso<
   void,
   Resultado<ListarAsesoresConLeadsOutput, ErrorDeDominio>
-> {
+>,
+  IListarAsesoresConLeads
+{
   constructor(private readonly ventasRepository: IVentasRepository) {}
 
   async ejecutar(): Promise<Resultado<ListarAsesoresConLeadsOutput, ErrorDeDominio>> {

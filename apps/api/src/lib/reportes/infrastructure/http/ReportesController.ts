@@ -1,17 +1,17 @@
 import { type Context } from "hono";
-import { type D1DatabaseLike, type SessionClaims } from "../../../shared/infrastructure";
 import {
-  ObtenerEstadisticasGlobalesUseCase,
-  ObtenerReporteGeneralUseCase,
-} from "../../application/use-cases";
-import { type IConsultaVentasParaReportes } from "../../domain/ports/IConsultaVentasParaReportes";
+  type IObtenerEstadisticasGlobales,
+  type IObtenerReporteGeneral,
+} from "../../application";
+import { type D1DatabaseLike, type SessionClaims } from "../../../shared/infrastructure";
 
 export type BindingsReportes = {
   DB: D1DatabaseLike;
 };
 
 export type ReportesRouterDeps = {
-  crearConsultaVentasParaReportes: (db: D1DatabaseLike) => IConsultaVentasParaReportes;
+  crearObtenerEstadisticasGlobales: (c: ContextoReportes) => IObtenerEstadisticasGlobales;
+  crearObtenerReporteGeneral: (c: ContextoReportes) => IObtenerReporteGeneral;
 };
 
 type ContextoReportes = Context<{
@@ -22,13 +22,9 @@ type ContextoReportes = Context<{
 export class ReportesController {
   constructor(private readonly deps: ReportesRouterDeps) {}
 
-  private consulta(c: ContextoReportes): IConsultaVentasParaReportes {
-    return this.deps.crearConsultaVentasParaReportes(c.env.DB);
-  }
-
   async estadisticasGlobales(c: ContextoReportes): Promise<Response> {
     try {
-      const useCase = new ObtenerEstadisticasGlobalesUseCase(this.consulta(c));
+      const useCase = this.deps.crearObtenerEstadisticasGlobales(c);
       const resultado = await useCase.ejecutar();
 
       if (!resultado.esExito) {
@@ -50,7 +46,7 @@ export class ReportesController {
 
   async reporteGeneral(c: ContextoReportes): Promise<Response> {
     try {
-      const useCase = new ObtenerReporteGeneralUseCase(this.consulta(c));
+      const useCase = this.deps.crearObtenerReporteGeneral(c);
       const resultado = await useCase.ejecutar();
 
       if (!resultado.esExito) {
