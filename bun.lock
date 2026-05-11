@@ -40,19 +40,9 @@
     "apps/web": {
       "name": "@alvas/web",
     },
-    "packages/shared-types": {
-      "name": "@alvas/shared-types",
-    },
-    "packages/shared-utils": {
-      "name": "@alvas/shared-utils",
-    },
   },
   "packages": {
     "@alvas/api": ["@alvas/api@workspace:apps/api"],
-
-    "@alvas/shared-types": ["@alvas/shared-types@workspace:packages/shared-types"],
-
-    "@alvas/shared-utils": ["@alvas/shared-utils@workspace:packages/shared-utils"],
 
     "@alvas/web": ["@alvas/web@workspace:apps/web"],
 

@@ -14,10 +14,10 @@ database_name = "alvas-dev"
 database_id = "3e42be52-b6b0-4519-a090-4aea158cd2b6"
 migrations_dir = "drizzle"
 
-# --- ENTORNO TESTING ---
+# --- ENTORNO STAGING ---
 
-[env.testing]
-[env.testing.vars]
+[env.staging]
+[env.staging.vars]
 AUTH_TOKEN_TTL_SEGUNDOS = "900"
 REFRESH_TOKEN_TTL_SEGUNDOS = "604800"
 
