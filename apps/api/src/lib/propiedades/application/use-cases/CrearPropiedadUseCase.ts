@@ -1,9 +1,14 @@
-import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
+import {
+  type CasoDeUso,
+  resultadoExitoso,
+  resultadoFallido,
+  type Resultado,
+} from "../../../shared";
 import { type IPropiedadRepository } from "../../domain/ports";
 import { Propiedad } from "../../domain/entities";
 import { idUsuarioRef } from "../../domain/value-objects";
 import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
-import { type IVerificadorDePermisos } from "../../../auth/domain/ports";
+import { type IAutorizadorPropiedades } from "../../domain/ports";
 import { PropiedadError } from "../../domain/errors/PropiedadError";
 
 export type CrearPropiedadInput = {
@@ -17,19 +22,24 @@ export type CrearPropiedadInput = {
   };
 };
 
-export class CrearPropiedadUseCase implements CasoDeUso<CrearPropiedadInput, Resultado<Propiedad, PropiedadError>> {
+export class CrearPropiedadUseCase implements CasoDeUso<
+  CrearPropiedadInput,
+  Resultado<Propiedad, PropiedadError>
+> {
   constructor(
     private readonly propiedadRepository: IPropiedadRepository,
     private readonly generadorId: IGeneradorId,
-    private readonly verificadorPermisos: IVerificadorDePermisos,
+    private readonly autorizador: IAutorizadorPropiedades,
   ) {}
 
   async ejecutar(input: CrearPropiedadInput): Promise<Resultado<Propiedad, PropiedadError>> {
     try {
       const { usuarioAutenticado } = input;
 
-      if (!this.verificadorPermisos.esPropietarioDePropiedad(usuarioAutenticado.id, input.idAsesor)) {
-        return resultadoFallido(new PropiedadError("No tienes permisos para asignar esta propiedad.", "SIN_PERMISOS"));
+      if (!this.autorizador.puedeAsignarPropiedad(usuarioAutenticado.id, input.idAsesor)) {
+        return resultadoFallido(
+          new PropiedadError("No tienes permisos para asignar esta propiedad.", "SIN_PERMISOS"),
+        );
       }
 
       const idAsesor = idUsuarioRef(input.idAsesor);

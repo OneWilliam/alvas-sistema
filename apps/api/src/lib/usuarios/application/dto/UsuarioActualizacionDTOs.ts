@@ -1,5 +1,6 @@
 export interface UsuarioOutputDTO {
   id: string;
+  username: string;
   nombre: string;
   rol: string;
   estado: string;
@@ -9,6 +10,7 @@ export interface UsuarioOutputDTO {
 
 export interface ActualizarUsuarioInputDTO {
   idUsuario: string;
+  username?: string;
   nombre?: string;
   rol?: string;
 }

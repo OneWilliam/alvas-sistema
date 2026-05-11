@@ -1,4 +1,9 @@
-import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
+import {
+  type CasoDeUso,
+  resultadoExitoso,
+  resultadoFallido,
+  type Resultado,
+} from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain/errors/ErrorDeDominio";
 import { type IContratoRepository } from "../../domain/ports/IContratoRepository";
 import { Contrato } from "../../domain/entities/Contrato";
@@ -9,10 +14,15 @@ import { idContrato, idCliente, idPropiedad } from "../../domain/value-objects/I
 export type CrearContratoInput = CrearContratoInputDTO;
 export type CrearContratoOutput = ContratoOutputDTO;
 
-export class CrearContratoUseCase implements CasoDeUso<CrearContratoInput, Resultado<CrearContratoOutput, ErrorDeDominio>> {
+export class CrearContratoUseCase implements CasoDeUso<
+  CrearContratoInput,
+  Resultado<CrearContratoOutput, ErrorDeDominio>
+> {
   constructor(private readonly repository: IContratoRepository) {}
 
-  async ejecutar(input: CrearContratoInput): Promise<Resultado<CrearContratoOutput, ErrorDeDominio>> {
+  async ejecutar(
+    input: CrearContratoInput,
+  ): Promise<Resultado<CrearContratoOutput, ErrorDeDominio>> {
     try {
       const contrato = Contrato.crear({
         id: idContrato(input.id),

@@ -5,6 +5,7 @@ export type SesionAutenticadaDTO = {
   refreshToken: string;
   usuario: {
     id: string;
+    username: string;
     rol: ValorRolAcceso;
   };
 };

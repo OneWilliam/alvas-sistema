@@ -1,11 +1,11 @@
 import { type ITokenProvider } from "../../domain/ports";
-import { type PayloadToken } from "../../domain/types/PayloadToken";
 import { AuthTokenInvalidoError, RefreshTokenInvalidoError } from "../../domain";
 import { AuthToken, RefreshToken } from "../../domain/value-objects";
+import { type SessionClaims } from "../../../shared/infrastructure/session";
 
 type TipoToken = "auth" | "refresh";
 
-type TokenPayload = PayloadToken & {
+type TokenPayload = SessionClaims & {
   tipo: TipoToken;
   exp: number;
 };
@@ -54,12 +54,17 @@ export class HmacTokenProvider implements ITokenProvider {
     this.refreshTokenTtlSegundos = params.refreshTokenTtlSegundos ?? 60 * 60 * 24 * 7;
   }
 
-  async generarAuthToken(payload: PayloadToken): Promise<AuthToken> {
-    const token = await this.firmar(payload, this.params.authSecret, "auth", this.authTokenTtlSegundos);
+  async generarAuthToken(payload: SessionClaims): Promise<AuthToken> {
+    const token = await this.firmar(
+      payload,
+      this.params.authSecret,
+      "auth",
+      this.authTokenTtlSegundos,
+    );
     return new AuthToken(token);
   }
 
-  async generarRefreshToken(payload: PayloadToken): Promise<RefreshToken> {
+  async generarRefreshToken(payload: SessionClaims): Promise<RefreshToken> {
     const token = await this.firmar(
       payload,
       this.refreshSecret,
@@ -69,16 +74,16 @@ export class HmacTokenProvider implements ITokenProvider {
     return new RefreshToken(token);
   }
 
-  async validarAuthToken(token: AuthToken): Promise<PayloadToken> {
+  async validarAuthToken(token: AuthToken): Promise<SessionClaims> {
     return this.validar(token.valor, this.params.authSecret, "auth");
   }
 
-  async validarRefreshToken(token: RefreshToken): Promise<PayloadToken> {
+  async validarRefreshToken(token: RefreshToken): Promise<SessionClaims> {
     return this.validar(token.valor, this.refreshSecret, "refresh");
   }
 
   private async firmar(
-    payload: PayloadToken,
+    payload: SessionClaims,
     secret: string,
     tipo: TipoToken,
     ttlSegundos: number,
@@ -96,11 +101,17 @@ export class HmacTokenProvider implements ITokenProvider {
     return `${header}.${body}.${firma}`;
   }
 
-  private async validar(token: string, secret: string, tipoEsperado: TipoToken): Promise<PayloadToken> {
+  private async validar(
+    token: string,
+    secret: string,
+    tipoEsperado: TipoToken,
+  ): Promise<SessionClaims> {
     const partes = token.split(".");
 
     if (partes.length !== 3) {
-      throw tipoEsperado === "auth" ? new AuthTokenInvalidoError() : new RefreshTokenInvalidoError();
+      throw tipoEsperado === "auth"
+        ? new AuthTokenInvalidoError()
+        : new RefreshTokenInvalidoError();
     }
 
     const header = partes[0];
@@ -108,13 +119,17 @@ export class HmacTokenProvider implements ITokenProvider {
     const firmaRecibida = partes[2];
 
     if (!header || !body || !firmaRecibida) {
-      throw tipoEsperado === "auth" ? new AuthTokenInvalidoError() : new RefreshTokenInvalidoError();
+      throw tipoEsperado === "auth"
+        ? new AuthTokenInvalidoError()
+        : new RefreshTokenInvalidoError();
     }
 
     const firmaEsperada = await this.generarFirma(`${header}.${body}`, secret);
 
     if (!compararSeguro(firmaRecibida, firmaEsperada)) {
-      throw tipoEsperado === "auth" ? new AuthTokenInvalidoError() : new RefreshTokenInvalidoError();
+      throw tipoEsperado === "auth"
+        ? new AuthTokenInvalidoError()
+        : new RefreshTokenInvalidoError();
     }
 
     const payload = JSON.parse(base64UrlDecode(body)) as TokenPayload;
@@ -126,7 +141,9 @@ export class HmacTokenProvider implements ITokenProvider {
       !payload.exp ||
       payload.exp < Math.floor(Date.now() / 1000)
     ) {
-      throw tipoEsperado === "auth" ? new AuthTokenInvalidoError() : new RefreshTokenInvalidoError();
+      throw tipoEsperado === "auth"
+        ? new AuthTokenInvalidoError()
+        : new RefreshTokenInvalidoError();
     }
 
     return {

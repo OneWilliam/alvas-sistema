@@ -27,13 +27,27 @@ export class Cita {
     return new Cita(props);
   }
 
-  get id(): IdCita { return this.props.id; }
-  get idLead(): IdLead { return this.props.idLead; }
-  get idPropiedad(): string | undefined { return this.props.idPropiedad; }
-  get fechaInicio(): Date { return this.props.fechaInicio; }
-  get fechaFin(): Date { return this.props.fechaFin; }
-  get estado(): ValorEstadoCita { return this.props.estado; }
-  get observacion(): string | undefined { return this.props.observacion; }
+  get id(): IdCita {
+    return this.props.id;
+  }
+  get idLead(): IdLead {
+    return this.props.idLead;
+  }
+  get idPropiedad(): string | undefined {
+    return this.props.idPropiedad;
+  }
+  get fechaInicio(): Date {
+    return this.props.fechaInicio;
+  }
+  get fechaFin(): Date {
+    return this.props.fechaFin;
+  }
+  get estado(): ValorEstadoCita {
+    return this.props.estado;
+  }
+  get observacion(): string | undefined {
+    return this.props.observacion;
+  }
 
   marcarComoRealizada(): void {
     if (this.props.estado === "CANCELADA") {
@@ -45,7 +59,7 @@ export class Cita {
   cancelar(motivo?: string): void {
     this.props.estado = "CANCELADA";
     if (motivo) {
-      this.props.observacion = this.props.observacion 
+      this.props.observacion = this.props.observacion
         ? `${this.props.observacion} | Cancelado: ${motivo}`
         : `Cancelado: ${motivo}`;
     }

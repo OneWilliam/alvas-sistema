@@ -11,10 +11,15 @@ export type ListarLeadsPorAsesorInput = {
 
 export type ListarLeadsPorAsesorOutput = Lead[];
 
-export class ListarLeadsPorAsesorUseCase implements CasoDeUso<ListarLeadsPorAsesorInput, Resultado<ListarLeadsPorAsesorOutput, ErrorDeDominio>> {
+export class ListarLeadsPorAsesorUseCase implements CasoDeUso<
+  ListarLeadsPorAsesorInput,
+  Resultado<ListarLeadsPorAsesorOutput, ErrorDeDominio>
+> {
   constructor(private readonly ventasRepository: IVentasRepository) {}
 
-  async ejecutar(input: ListarLeadsPorAsesorInput): Promise<Resultado<ListarLeadsPorAsesorOutput, ErrorDeDominio>> {
+  async ejecutar(
+    input: ListarLeadsPorAsesorInput,
+  ): Promise<Resultado<ListarLeadsPorAsesorOutput, ErrorDeDominio>> {
     try {
       const leads = await this.ventasRepository.listarLeadsPorAsesor(idUsuarioRef(input.idAsesor));
 

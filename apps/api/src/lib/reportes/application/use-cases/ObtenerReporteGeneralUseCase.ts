@@ -1,44 +1,52 @@
-import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
+import {
+  type CasoDeUso,
+  resultadoExitoso,
+  resultadoFallido,
+  type Resultado,
+} from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain/errors/ErrorDeDominio";
-import { type IVentasRepository } from "../../../ventas/domain/ports/IVentasRepository";
+import { ReporteGeneral } from "../../domain";
+import { type IConsultaVentasParaReportes } from "../../domain/ports/IConsultaVentasParaReportes";
+import { PorcentajeConversion } from "../../domain/value-objects/PorcentajeConversion";
+import { type ReporteGeneralOutput } from "../dto/ReportesSalidaDTOs";
 
-export type ReporteGeneralOutput = {
-  fechaGeneracion: Date;
-  metricas: {
-    conversionRate: number;
-    leadsNuevosHoy: number;
-    citasPendientes: number;
-  };
-  actividadReciente: { idLead: string; evento: string; descripcion: string; fecha: string }[];
-};
-
-export class ObtenerReporteGeneralUseCase implements CasoDeUso<void, Resultado<ReporteGeneralOutput, ErrorDeDominio>> {
-  constructor(private readonly repository: IVentasRepository) {}
+export class ObtenerReporteGeneralUseCase implements CasoDeUso<
+  void,
+  Resultado<ReporteGeneralOutput, ErrorDeDominio>
+> {
+  constructor(private readonly consultaVentas: IConsultaVentasParaReportes) {}
 
   async ejecutar(): Promise<Resultado<ReporteGeneralOutput, ErrorDeDominio>> {
     try {
-      const leads = await this.repository.listarLeads();
-      const clientes = await this.repository.listarClientes();
-      const actividadReciente = await this.repository.obtenerActividadReciente(10);
-      
+      const leads = await this.consultaVentas.listarLeadsParaReporte();
+      const clientes = await this.consultaVentas.listarClientesParaReporte();
+      const actividadReciente = await this.consultaVentas.obtenerActividadReciente(10);
+
       const hoy = new Date();
       hoy.setHours(0, 0, 0, 0);
 
-      const leadsNuevosHoy = leads.filter(l => l.creadoEn >= hoy).length;
-      const totalLeads = leads.length || 1;
-      const conversionRate = (clientes.length / totalLeads) * 100;
+      const leadsNuevosHoy = leads.filter((l) => l.creadoEn >= hoy).length;
+      const porcentaje = PorcentajeConversion.desdeLeadsYClientes(clientes.length, leads.length);
 
-      const citasPendientes = leads.reduce((acc, lead) => 
-        acc + lead.citas.filter(c => c.estado === "PENDIENTE").length, 0);
+      const citasPendientes = leads.reduce(
+        (acc, lead) => acc + lead.citas.filter((c) => c.estado === "PENDIENTE").length,
+        0,
+      );
 
-      return resultadoExitoso({
-        fechaGeneracion: new Date(),
-        metricas: {
-          conversionRate,
+      const reporte = new ReporteGeneral(
+        new Date(),
+        {
+          conversionRate: porcentaje.valorNumerico,
           leadsNuevosHoy,
           citasPendientes,
         },
         actividadReciente,
+      );
+
+      return resultadoExitoso({
+        fechaGeneracion: reporte.fechaGeneracion,
+        metricas: reporte.metricas,
+        actividadReciente: reporte.actividadReciente,
       });
     } catch (error) {
       if (error instanceof ErrorDeDominio) return resultadoFallido(error);

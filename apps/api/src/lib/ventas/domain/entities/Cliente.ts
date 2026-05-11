@@ -36,14 +36,30 @@ export class Cliente {
     return new Cliente(props);
   }
 
-  get id(): IdCliente { return this.props.id; }
-  get nombre(): string { return this.props.nombre; }
-  get email(): string { return this.props.email; }
-  get telefono(): string { return this.props.telefono; }
-  get idAsesor(): IdUsuarioRef { return this.props.idAsesor; }
-  get idLeadOrigen(): IdLead | undefined { return this.props.idLeadOrigen; }
-  get creadoEn(): Date { return this.props.creadoEn; }
-  get actualizadoEn(): Date { return this.props.actualizadoEn; }
+  get id(): IdCliente {
+    return this.props.id;
+  }
+  get nombre(): string {
+    return this.props.nombre;
+  }
+  get email(): string {
+    return this.props.email;
+  }
+  get telefono(): string {
+    return this.props.telefono;
+  }
+  get idAsesor(): IdUsuarioRef {
+    return this.props.idAsesor;
+  }
+  get idLeadOrigen(): IdLead | undefined {
+    return this.props.idLeadOrigen;
+  }
+  get creadoEn(): Date {
+    return this.props.creadoEn;
+  }
+  get actualizadoEn(): Date {
+    return this.props.actualizadoEn;
+  }
 
   actualizarDatosContacto(params: { nombre?: string; email?: string; telefono?: string }): void {
     if (params.nombre) this.props.nombre = params.nombre;

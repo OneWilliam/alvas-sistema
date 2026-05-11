@@ -1,9 +1,10 @@
 import { ErrorDeValidacion } from "../../../shared/domain";
 import { UsuarioYaDeshabilitadoError } from "../errors";
-import { EstadoUsuario, IdUsuario, Nombre, Rol, HashClave } from "../value-objects";
+import { EstadoUsuario, IdUsuario, Nombre, Rol, HashClave, Username } from "../value-objects";
 
 type PropsUsuario = {
   id: IdUsuario;
+  username: Username;
   nombre: Nombre;
   hashClave: HashClave;
   rol: Rol;
@@ -14,6 +15,7 @@ type PropsUsuario = {
 
 type CrearUsuarioParams = {
   id: string;
+  username: string;
   nombre: string;
   hashClave: string;
   rol: string;
@@ -22,6 +24,7 @@ type CrearUsuarioParams = {
 
 type ReconstituirUsuarioParams = {
   id: string;
+  username: string;
   nombre: string;
   hashClave: string;
   rol: string;
@@ -32,6 +35,7 @@ type ReconstituirUsuarioParams = {
 
 export class Usuario {
   private readonly idInterno: IdUsuario;
+  private usernameInterno: Username;
   private nombreInterno: Nombre;
   private hashClaveInterna: HashClave;
   private rolInterno: Rol;
@@ -41,6 +45,7 @@ export class Usuario {
 
   private constructor(props: PropsUsuario) {
     this.idInterno = props.id;
+    this.usernameInterno = props.username;
     this.nombreInterno = props.nombre;
     this.hashClaveInterna = props.hashClave;
     this.rolInterno = props.rol;
@@ -54,6 +59,7 @@ export class Usuario {
 
     return new Usuario({
       id: new IdUsuario(params.id),
+      username: new Username(params.username),
       nombre: new Nombre(params.nombre),
       hashClave: new HashClave(params.hashClave),
       rol: new Rol(params.rol),
@@ -73,6 +79,7 @@ export class Usuario {
 
     return new Usuario({
       id: new IdUsuario(params.id),
+      username: new Username(params.username),
       nombre: new Nombre(params.nombre),
       hashClave: new HashClave(params.hashClave),
       rol: new Rol(params.rol),
@@ -88,6 +95,10 @@ export class Usuario {
 
   get nombre(): Nombre {
     return this.nombreInterno;
+  }
+
+  get username(): Username {
+    return this.usernameInterno;
   }
 
   get rol(): Rol {
@@ -117,6 +128,11 @@ export class Usuario {
 
   cambiarNombre(nuevoNombre: string): void {
     this.nombreInterno = new Nombre(nuevoNombre);
+    this.actualizadoEnInterno = new Date();
+  }
+
+  cambiarUsername(nuevoUsername: string): void {
+    this.usernameInterno = new Username(nuevoUsername);
     this.actualizadoEnInterno = new Date();
   }
 

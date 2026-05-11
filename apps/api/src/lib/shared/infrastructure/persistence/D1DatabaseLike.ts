@@ -16,4 +16,6 @@ export interface D1StatementLike {
 export interface D1DatabaseLike {
   prepare(query: string): D1StatementLike;
   exec(query: string): Promise<unknown>;
+  /** Lote atómico (p. ej. statements generados por Drizzle para D1). */
+  batch?(statements: unknown[]): Promise<unknown[]>;
 }

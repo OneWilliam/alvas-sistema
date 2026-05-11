@@ -10,13 +10,18 @@ export type ListarPropiedadesPorClienteInput = {
 
 export type ListarPropiedadesPorClienteOutput = IdPropiedad[];
 
-export class ListarPropiedadesPorClienteUseCase implements CasoDeUso<ListarPropiedadesPorClienteInput, Resultado<ListarPropiedadesPorClienteOutput, ErrorDeDominio>> {
+export class ListarPropiedadesPorClienteUseCase implements CasoDeUso<
+  ListarPropiedadesPorClienteInput,
+  Resultado<ListarPropiedadesPorClienteOutput, ErrorDeDominio>
+> {
   constructor(private readonly contratoRepository: IContratoRepository) {}
 
-  async ejecutar(input: ListarPropiedadesPorClienteInput): Promise<Resultado<ListarPropiedadesPorClienteOutput, ErrorDeDominio>> {
+  async ejecutar(
+    input: ListarPropiedadesPorClienteInput,
+  ): Promise<Resultado<ListarPropiedadesPorClienteOutput, ErrorDeDominio>> {
     try {
       const contratos = await this.contratoRepository.listarPorCliente(idCliente(input.idCliente));
-      const propiedadIds = contratos.map(c => c.idPropiedad);
+      const propiedadIds = contratos.map((c) => c.idPropiedad);
 
       // Eliminar duplicados
       const uniqueIds = Array.from(new Set(propiedadIds));

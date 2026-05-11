@@ -1,4 +1,9 @@
-import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
+import {
+  type CasoDeUso,
+  resultadoExitoso,
+  resultadoFallido,
+  type Resultado,
+} from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain/errors/ErrorDeDominio";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { idCliente } from "../../domain/value-objects/Ids";
@@ -8,10 +13,15 @@ import { type ActualizarClienteInputDTO, type ClienteOutputDTO } from "../dto/Cl
 export type ActualizarClienteInput = ActualizarClienteInputDTO;
 export type ActualizarClienteOutput = ClienteOutputDTO;
 
-export class ActualizarClienteUseCase implements CasoDeUso<ActualizarClienteInput, Resultado<ActualizarClienteOutput, ErrorDeDominio>> {
+export class ActualizarClienteUseCase implements CasoDeUso<
+  ActualizarClienteInput,
+  Resultado<ActualizarClienteOutput, ErrorDeDominio>
+> {
   constructor(private readonly ventasRepository: IVentasRepository) {}
 
-  async ejecutar(input: ActualizarClienteInput): Promise<Resultado<ActualizarClienteOutput, ErrorDeDominio>> {
+  async ejecutar(
+    input: ActualizarClienteInput,
+  ): Promise<Resultado<ActualizarClienteOutput, ErrorDeDominio>> {
     try {
       const cliente = await this.ventasRepository.obtenerClientePorId(idCliente(input.idCliente));
       if (!cliente) {

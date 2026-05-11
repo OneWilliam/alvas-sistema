@@ -9,7 +9,10 @@ export type FirmarContratoInput = {
   idContrato: string;
 };
 
-export class FirmarContratoUseCase implements CasoDeUso<FirmarContratoInput, Resultado<void, ErrorDeDominio>> {
+export class FirmarContratoUseCase implements CasoDeUso<
+  FirmarContratoInput,
+  Resultado<void, ErrorDeDominio>
+> {
   constructor(private readonly contratoRepository: IContratoRepository) {}
 
   async ejecutar(input: FirmarContratoInput): Promise<Resultado<void, ErrorDeDominio>> {

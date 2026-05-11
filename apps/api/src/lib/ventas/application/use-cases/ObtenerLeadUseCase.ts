@@ -1,4 +1,9 @@
-import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
+import {
+  type CasoDeUso,
+  resultadoExitoso,
+  resultadoFallido,
+  type Resultado,
+} from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain/errors/ErrorDeDominio";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { idLead } from "../../domain/value-objects/Ids";
@@ -9,7 +14,10 @@ import { type Lead } from "../../domain/entities/Lead";
 export type ObtenerLeadInput = ObtenerLeadInputDTO;
 export type ObtenerLeadOutput = Lead;
 
-export class ObtenerLeadUseCase implements CasoDeUso<ObtenerLeadInput, Resultado<ObtenerLeadOutput, ErrorDeDominio>> {
+export class ObtenerLeadUseCase implements CasoDeUso<
+  ObtenerLeadInput,
+  Resultado<ObtenerLeadOutput, ErrorDeDominio>
+> {
   constructor(private readonly repository: IVentasRepository) {}
 
   async ejecutar(input: ObtenerLeadInput): Promise<Resultado<ObtenerLeadOutput, ErrorDeDominio>> {

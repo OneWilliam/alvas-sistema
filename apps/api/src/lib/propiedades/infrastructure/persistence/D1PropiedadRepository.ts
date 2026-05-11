@@ -33,18 +33,17 @@ export class D1PropiedadRepository implements IPropiedadRepository {
   }
 
   async eliminarPorId(id: IdPropiedad): Promise<void> {
-    await this.drizzle().delete(propiedadesTable).where(eq(propiedadesTable.id, id as string));
+    await this.drizzle()
+      .delete(propiedadesTable)
+      .where(eq(propiedadesTable.id, id as string));
   }
 
   async guardar(propiedad: Propiedad): Promise<void> {
     const values = PropiedadMapper.aPersistencia(propiedad);
-    await this.drizzle()
-      .insert(propiedadesTable)
-      .values(values)
-      .onConflictDoUpdate({
-        target: propiedadesTable.id,
-        set: values,
-      });
+    await this.drizzle().insert(propiedadesTable).values(values).onConflictDoUpdate({
+      target: propiedadesTable.id,
+      set: values,
+    });
   }
 
   async listarTodas(): Promise<Propiedad[]> {

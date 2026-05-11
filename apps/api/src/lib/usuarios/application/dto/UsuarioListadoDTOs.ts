@@ -1,5 +1,6 @@
 export interface UsuarioListadoOutputDTO {
   id: string;
+  username: string;
   nombre: string;
   rol: string;
   estado: string;

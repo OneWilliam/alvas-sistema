@@ -1,4 +1,9 @@
-import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
+import {
+  type CasoDeUso,
+  resultadoExitoso,
+  resultadoFallido,
+  type Resultado,
+} from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { Cita } from "../../domain/entities/Cita";
@@ -13,7 +18,10 @@ export type AgendarCitaInput = {
   observacion?: string;
 };
 
-export class AgendarCitaUseCase implements CasoDeUso<AgendarCitaInput, Resultado<void, ErrorDeDominio>> {
+export class AgendarCitaUseCase implements CasoDeUso<
+  AgendarCitaInput,
+  Resultado<void, ErrorDeDominio>
+> {
   constructor(
     private readonly repository: IVentasRepository,
     private readonly generadorId: IGeneradorId,
@@ -22,7 +30,10 @@ export class AgendarCitaUseCase implements CasoDeUso<AgendarCitaInput, Resultado
   async ejecutar(input: AgendarCitaInput): Promise<Resultado<void, ErrorDeDominio>> {
     try {
       const lead = await this.repository.obtenerLeadPorId(idLead(input.idLead));
-      if (!lead) return resultadoFallido(new ErrorDeDominio("Lead no encontrado", { codigo: "LEAD_NO_ENCONTRADO" }));
+      if (!lead)
+        return resultadoFallido(
+          new ErrorDeDominio("Lead no encontrado", { codigo: "LEAD_NO_ENCONTRADO" }),
+        );
 
       const fechaFin = new Date(input.fechaInicio.getTime() + input.duracionMinutos * 60000);
 
@@ -38,7 +49,11 @@ export class AgendarCitaUseCase implements CasoDeUso<AgendarCitaInput, Resultado
 
       lead.agendarCita(cita);
       await this.repository.guardarLead(lead);
-      await this.repository.registrarActividad(lead.id, "CITA_AGENDADA", `Cita agendada para el ${input.fechaInicio.toLocaleString()}`);
+      await this.repository.registrarActividad(
+        lead.id,
+        "CITA_AGENDADA",
+        `Cita agendada para el ${input.fechaInicio.toLocaleString()}`,
+      );
 
       return resultadoExitoso(undefined);
     } catch (error) {

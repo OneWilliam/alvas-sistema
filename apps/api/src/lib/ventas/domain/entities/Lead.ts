@@ -56,18 +56,42 @@ export class Lead {
     return new Lead(props);
   }
 
-  get id(): IdLead { return this.props.id; }
-  get nombre(): string { return this.props.nombre; }
-  get email(): string { return this.props.email; }
-  get telefono(): string { return this.props.telefono; }
-  get tipo(): TipoVenta { return this.props.tipo; }
-  get estado(): EstadoLead { return this.props.estado; }
-  get idAsesor(): IdUsuarioRef { return this.props.idAsesor; }
-  get idCliente(): IdCliente | undefined { return this.props.idCliente; }
-  get idPropiedadInteres(): IdPropiedad | undefined { return this.props.idPropiedadInteres; }
-  get citas(): ReadonlyArray<Cita> { return this.props.citas; }
-  get creadoEn(): Date { return this.props.creadoEn; }
-  get actualizadoEn(): Date { return this.props.actualizadoEn; }
+  get id(): IdLead {
+    return this.props.id;
+  }
+  get nombre(): string {
+    return this.props.nombre;
+  }
+  get email(): string {
+    return this.props.email;
+  }
+  get telefono(): string {
+    return this.props.telefono;
+  }
+  get tipo(): TipoVenta {
+    return this.props.tipo;
+  }
+  get estado(): EstadoLead {
+    return this.props.estado;
+  }
+  get idAsesor(): IdUsuarioRef {
+    return this.props.idAsesor;
+  }
+  get idCliente(): IdCliente | undefined {
+    return this.props.idCliente;
+  }
+  get idPropiedadInteres(): IdPropiedad | undefined {
+    return this.props.idPropiedadInteres;
+  }
+  get citas(): ReadonlyArray<Cita> {
+    return this.props.citas;
+  }
+  get creadoEn(): Date {
+    return this.props.creadoEn;
+  }
+  get actualizadoEn(): Date {
+    return this.props.actualizadoEn;
+  }
 
   agendarCita(cita: Cita): void {
     if (this.props.estado.estaCerrado()) {
@@ -92,12 +116,12 @@ export class Lead {
   }
 
   obtenerCitaPorId(idCita: IdCita): Cita | undefined {
-    return this.props.citas.find(cita => cita.id === idCita);
+    return this.props.citas.find((cita) => cita.id === idCita);
   }
 
   obtenerVisitasRealizadas(): Cita[] {
     return [...this.props.citas]
-      .filter(cita => cita.estado === "REALIZADA")
+      .filter((cita) => cita.estado === "REALIZADA")
       .sort((a, b) => a.fechaInicio.getTime() - b.fechaInicio.getTime());
   }
 

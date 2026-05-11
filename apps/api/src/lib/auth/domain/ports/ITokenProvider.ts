@@ -1,9 +1,9 @@
 import { AuthToken, RefreshToken } from "../../domain/value-objects";
-import { type PayloadToken } from "../../domain/types/PayloadToken";
+import { type SessionClaims } from "../../../shared/infrastructure/session";
 
 export interface ITokenProvider {
-  generarAuthToken(payload: PayloadToken): Promise<AuthToken> | AuthToken;
-  generarRefreshToken(payload: PayloadToken): Promise<RefreshToken> | RefreshToken;
-  validarAuthToken(token: AuthToken): Promise<PayloadToken> | PayloadToken;
-  validarRefreshToken(token: RefreshToken): Promise<PayloadToken> | PayloadToken;
+  generarAuthToken(payload: SessionClaims): Promise<AuthToken> | AuthToken;
+  generarRefreshToken(payload: SessionClaims): Promise<RefreshToken> | RefreshToken;
+  validarAuthToken(token: AuthToken): Promise<SessionClaims> | SessionClaims;
+  validarRefreshToken(token: RefreshToken): Promise<SessionClaims> | SessionClaims;
 }

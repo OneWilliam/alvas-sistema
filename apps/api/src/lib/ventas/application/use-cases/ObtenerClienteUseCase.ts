@@ -10,7 +10,10 @@ export type ObtenerClienteInput = {
   id: string;
 };
 
-export class ObtenerClienteUseCase implements CasoDeUso<ObtenerClienteInput, Resultado<Cliente, ErrorDeDominio>> {
+export class ObtenerClienteUseCase implements CasoDeUso<
+  ObtenerClienteInput,
+  Resultado<Cliente, ErrorDeDominio>
+> {
   constructor(private readonly ventasRepository: IVentasRepository) {}
 
   async ejecutar(input: ObtenerClienteInput): Promise<Resultado<Cliente, ErrorDeDominio>> {

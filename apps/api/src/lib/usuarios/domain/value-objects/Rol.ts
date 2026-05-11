@@ -16,7 +16,7 @@ export class Rol {
 
     this.valorInterno = rolNormalizado as ValorRolUsuario;
   }
-// ...
+  // ...
 
   get valor(): ValorRolUsuario {
     return this.valorInterno;

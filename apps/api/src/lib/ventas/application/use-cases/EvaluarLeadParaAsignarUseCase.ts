@@ -6,7 +6,10 @@ import { ErrorDeDominio } from "../../../shared/domain";
 
 export type EvaluarLeadParaAsignarOutput = IdUsuarioRef;
 
-export class EvaluarLeadParaAsignarUseCase implements CasoDeUso<void, Resultado<EvaluarLeadParaAsignarOutput, ErrorDeDominio>> {
+export class EvaluarLeadParaAsignarUseCase implements CasoDeUso<
+  void,
+  Resultado<EvaluarLeadParaAsignarOutput, ErrorDeDominio>
+> {
   constructor(private readonly ventasRepository: IVentasRepository) {}
 
   async ejecutar(): Promise<Resultado<EvaluarLeadParaAsignarOutput, ErrorDeDominio>> {
@@ -18,7 +21,9 @@ export class EvaluarLeadParaAsignarUseCase implements CasoDeUso<void, Resultado<
       }
 
       // Lógica simple: asignar al que menos leads tiene
-      const mejorAsesor = stats.reduce((prev, curr) => (prev.totalLeads < curr.totalLeads ? prev : curr));
+      const mejorAsesor = stats.reduce((prev, curr) =>
+        prev.totalLeads < curr.totalLeads ? prev : curr,
+      );
 
       return resultadoExitoso(mejorAsesor.idAsesor);
     } catch (error) {

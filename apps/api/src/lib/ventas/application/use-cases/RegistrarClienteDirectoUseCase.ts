@@ -1,4 +1,9 @@
-import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
+import {
+  type CasoDeUso,
+  resultadoExitoso,
+  resultadoFallido,
+  type Resultado,
+} from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { Cliente } from "../../domain/entities/Cliente";
@@ -12,7 +17,10 @@ export type RegistrarClienteDirectoInput = {
   idAsesor: string;
 };
 
-export class RegistrarClienteDirectoUseCase implements CasoDeUso<RegistrarClienteDirectoInput, Resultado<Cliente, ErrorDeDominio>> {
+export class RegistrarClienteDirectoUseCase implements CasoDeUso<
+  RegistrarClienteDirectoInput,
+  Resultado<Cliente, ErrorDeDominio>
+> {
   constructor(
     private readonly repository: IVentasRepository,
     private readonly generadorId: IGeneradorId,

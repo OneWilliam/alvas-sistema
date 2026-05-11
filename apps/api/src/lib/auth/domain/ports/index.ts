@@ -1,4 +1,3 @@
-export * from "./IAutenticadorDeUsuario";
+export * from "./IConsultaCredencialesUsuario";
 export * from "./ITokenProvider";
 export * from "./IVerificadorDeClave";
-export * from "./IVerificadorDePermisos";

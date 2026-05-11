@@ -1,18 +1,15 @@
 import { type Context } from "hono";
-import { type D1DatabaseLike } from "../../../shared/infrastructure";
-import { 
-  RegistrarLeadUseCase, 
-  AgendarCitaUseCase, 
-  ConvertirLeadAClienteUseCase, 
+import { ErrorDeDominio } from "../../../shared/domain";
+import { type D1DatabaseLike, type SessionClaims } from "../../../shared/infrastructure";
+import {
+  RegistrarLeadUseCase,
+  AgendarCitaUseCase,
+  ConvertirLeadAClienteUseCase,
   RegistrarClienteDirectoUseCase,
   ActualizarLeadUseCase,
   ActualizarCitaUseCase,
   EvaluarLeadParaAsignarUseCase,
 } from "../../application";
-import {
-  ObtenerEstadisticasGlobalesUseCase,
-  ObtenerReporteGeneralUseCase
-} from "../../../reportes/application/use-cases";
 import { D1VentasRepository } from "../persistence/D1VentasRepository";
 import { UuidGeneradorId } from "../../../shared/infrastructure/security/UuidGeneradorId";
 import { idUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
@@ -22,15 +19,30 @@ export type BindingsVentas = {
 };
 
 type AppVariables = {
-  authPayload: { idUsuario: string; rol: string };
+  authPayload: SessionClaims;
 };
 
 type ContextoVentas = Context<{ Bindings: BindingsVentas; Variables: AppVariables }>;
 
 export class VentasController {
+  private jsonDominioFallo(
+    c: ContextoVentas,
+    error: ErrorDeDominio,
+    status: 400 | 401 | 403 | 404 | 409 = 400,
+  ): Response {
+    return c.json({ success: false, message: error.message, code: error.codigo }, status);
+  }
+
   async registrarLead(c: ContextoVentas): Promise<Response> {
     try {
-      const body = await c.req.json<{ nombre: string; email: string; telefono: string; tipo: string; idPropiedadInteres?: string; idAsesor?: string }>();
+      const body = await c.req.json<{
+        nombre: string;
+        email: string;
+        telefono: string;
+        tipo: string;
+        idPropiedadInteres?: string;
+        idAsesor?: string;
+      }>();
       const authPayload = c.get("authPayload");
       const repo = new D1VentasRepository(c.env.DB);
       const generadorId = new UuidGeneradorId();
@@ -43,18 +55,28 @@ export class VentasController {
       });
 
       if (!resultado.esExito) {
-        return c.json({ success: false, message: resultado.error.message, code: resultado.error.codigo }, 400);
+        return this.jsonDominioFallo(c, resultado.error);
       }
 
       return c.json({ success: true, data: { id: resultado.valor.id as string } }, 201);
-    } catch {
-      return c.json({ success: false, message: "Error interno" }, 500);
+    } catch (error) {
+      console.error("VentasController.registrarLead:", error);
+      return c.json(
+        { success: false, message: "Error interno", code: "VENTAS_ERROR_INTERNO" },
+        500,
+      );
     }
   }
 
   async agendarCita(c: ContextoVentas): Promise<Response> {
     try {
-      const body = await c.req.json<{ idLead: string; idPropiedad?: string; fechaInicio: string; duracionMinutos: number; observacion?: string }>();
+      const body = await c.req.json<{
+        idLead: string;
+        idPropiedad?: string;
+        fechaInicio: string;
+        duracionMinutos: number;
+        observacion?: string;
+      }>();
       const repo = new D1VentasRepository(c.env.DB);
       const generadorId = new UuidGeneradorId();
       const useCase = new AgendarCitaUseCase(repo, generadorId);
@@ -65,12 +87,16 @@ export class VentasController {
       });
 
       if (!resultado.esExito) {
-        return c.json({ success: false, message: resultado.error.message, code: resultado.error.codigo }, 400);
+        return this.jsonDominioFallo(c, resultado.error);
       }
 
       return c.json({ success: true, message: "Cita agendada" });
-    } catch {
-      return c.json({ success: false, message: "Error interno" }, 500);
+    } catch (error) {
+      console.error("VentasController.agendarCita:", error);
+      return c.json(
+        { success: false, message: "Error interno", code: "VENTAS_ERROR_INTERNO" },
+        500,
+      );
     }
   }
 
@@ -88,12 +114,16 @@ export class VentasController {
       });
 
       if (!resultado.esExito) {
-        return c.json({ success: false, message: resultado.error.message, code: resultado.error.codigo }, 400);
+        return this.jsonDominioFallo(c, resultado.error);
       }
 
       return c.json({ success: true, data: { id: resultado.valor.id as string } }, 201);
-    } catch {
-      return c.json({ success: false, message: "Error interno" }, 500);
+    } catch (error) {
+      console.error("VentasController.registrarClienteDirecto:", error);
+      return c.json(
+        { success: false, message: "Error interno", code: "VENTAS_ERROR_INTERNO" },
+        500,
+      );
     }
   }
 
@@ -107,29 +137,44 @@ export class VentasController {
       const resultado = await useCase.ejecutar({ idLead });
 
       if (!resultado.esExito) {
-        return c.json({ success: false, message: resultado.error.message, code: resultado.error.codigo }, 400);
+        return this.jsonDominioFallo(c, resultado.error);
       }
 
       return c.json({ success: true, data: { idCliente: resultado.valor.id as string } });
-    } catch {
-      return c.json({ success: false, message: "Error interno" }, 500);
+    } catch (error) {
+      console.error("VentasController.convertirACliente:", error);
+      return c.json(
+        { success: false, message: "Error interno", code: "VENTAS_ERROR_INTERNO" },
+        500,
+      );
     }
   }
 
   async editarLead(c: ContextoVentas): Promise<Response> {
     try {
       const id = c.req.param("id") ?? "";
-      const body = await c.req.json<{ nombre?: string; email?: string; telefono?: string; tipo?: string }>();
+      const body = await c.req.json<{
+        nombre?: string;
+        email?: string;
+        telefono?: string;
+        tipo?: string;
+      }>();
       const repo = new D1VentasRepository(c.env.DB);
       const useCase = new ActualizarLeadUseCase(repo);
 
       const resultado = await useCase.ejecutar({ id, ...body });
 
-      if (!resultado.esExito) return c.json({ success: false, message: resultado.error.message }, 400);
+      if (!resultado.esExito) {
+        return this.jsonDominioFallo(c, resultado.error);
+      }
 
       return c.json({ success: true, message: "Lead actualizado" });
-    } catch {
-      return c.json({ success: false, message: "Error interno" }, 500);
+    } catch (error) {
+      console.error("VentasController.editarLead:", error);
+      return c.json(
+        { success: false, message: "Error interno", code: "VENTAS_ERROR_INTERNO" },
+        500,
+      );
     }
   }
 
@@ -137,7 +182,11 @@ export class VentasController {
     try {
       const idLead = c.req.param("idLead") ?? "";
       const idCita = c.req.param("idCita") ?? "";
-      const body = await c.req.json<{ fechaInicio?: string; duracionMinutos?: number; observacion?: string }>();
+      const body = await c.req.json<{
+        fechaInicio?: string;
+        duracionMinutos?: number;
+        observacion?: string;
+      }>();
       const repo = new D1VentasRepository(c.env.DB);
       const useCase = new ActualizarCitaUseCase(repo);
 
@@ -148,11 +197,17 @@ export class VentasController {
         fechaInicio: body.fechaInicio ? new Date(body.fechaInicio) : undefined,
       });
 
-      if (!resultado.esExito) return c.json({ success: false, message: resultado.error.message }, 400);
+      if (!resultado.esExito) {
+        return this.jsonDominioFallo(c, resultado.error);
+      }
 
       return c.json({ success: true, message: "Cita actualizada" });
-    } catch {
-      return c.json({ success: false, message: "Error interno" }, 500);
+    } catch (error) {
+      console.error("VentasController.editarCita:", error);
+      return c.json(
+        { success: false, message: "Error interno", code: "VENTAS_ERROR_INTERNO" },
+        500,
+      );
     }
   }
 
@@ -160,47 +215,25 @@ export class VentasController {
     try {
       const authPayload = c.get("authPayload");
       const repo = new D1VentasRepository(c.env.DB);
-      
+
       const leads = await repo.listarLeadsPorAsesor(idUsuarioRef(authPayload.idUsuario));
-      
+
       return c.json({
         success: true,
-        data: leads.map(l => ({
+        data: leads.map((l) => ({
           id: l.id as string,
           nombre: l.nombre,
           estado: l.estado.valor,
           tipo: l.tipo.valor,
-          citasCount: l.citas.length
-        }))
+          citasCount: l.citas.length,
+        })),
       });
-    } catch {
-      return c.json({ success: false, message: "Error interno" }, 500);
-    }
-  }
-
-  async obtenerStats(c: ContextoVentas): Promise<Response> {
-    try {
-      const repo = new D1VentasRepository(c.env.DB);
-      const useCase = new ObtenerEstadisticasGlobalesUseCase(repo);
-      const resultado = await useCase.ejecutar();
-      
-      if (!resultado.esExito) return c.json({ success: false, message: resultado.error.message }, 400);
-      return c.json({ success: true, data: resultado.valor });
-    } catch {
-      return c.json({ success: false, message: "Error interno" }, 500);
-    }
-  }
-
-  async obtenerReporte(c: ContextoVentas): Promise<Response> {
-    try {
-      const repo = new D1VentasRepository(c.env.DB);
-      const useCase = new ObtenerReporteGeneralUseCase(repo);
-      const resultado = await useCase.ejecutar();
-      
-      if (!resultado.esExito) return c.json({ success: false, message: resultado.error.message }, 400);
-      return c.json({ success: true, data: resultado.valor });
-    } catch {
-      return c.json({ success: false, message: "Error interno" }, 500);
+    } catch (error) {
+      console.error("VentasController.listarPipeline:", error);
+      return c.json(
+        { success: false, message: "Error interno", code: "VENTAS_ERROR_INTERNO" },
+        500,
+      );
     }
   }
 }

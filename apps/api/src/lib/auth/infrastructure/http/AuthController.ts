@@ -1,13 +1,10 @@
 import { type Context } from "hono";
 import { type D1DatabaseLike } from "../../../shared/infrastructure";
-import { Pbkdf2PasswordHasher } from "../../../usuarios/infrastructure/security/Pbkdf2PasswordHasher";
 import { IniciarSesionUseCase } from "../../application/use-cases/IniciarSesionUseCase";
 import { RenovarSesionUseCase } from "../../application/use-cases/RenovarSesionUseCase";
-import { D1UsuarioRepository } from "../../../usuarios/infrastructure/persistence/D1UsuarioRepository";
-import { HmacTokenProvider } from "../security/HmacTokenProvider";
+import { type IConsultaCredencialesUsuario, type IVerificadorDeClave } from "../../domain/ports";
+import { type ITokenProvider } from "../../domain/ports/ITokenProvider";
 import { type IniciarSesionInput } from "../../application/use-cases/IniciarSesionUseCase";
-import { UsuarioAdapterParaAuth } from "../adapters/UsuarioAdapterParaAuth";
-import { VerificadorDeClaveAdapter } from "../adapters/VerificadorDeClaveAdapter";
 
 export type BindingsAuth = {
   DB: D1DatabaseLike;
@@ -18,26 +15,29 @@ export type BindingsAuth = {
   AUTH_PEPPER?: string;
 };
 
+export type AuthControllerDeps = Readonly<{
+  crearConsultaCredenciales: (db: D1DatabaseLike) => IConsultaCredencialesUsuario;
+  crearVerificadorDeClave: (pepper?: string) => IVerificadorDeClave;
+  crearTokenProvider: (env: BindingsAuth) => ITokenProvider;
+}>;
+
 type ContextoAuth = Context<{ Bindings: BindingsAuth }>;
 
 export class AuthController {
+  constructor(private readonly deps: AuthControllerDeps) {}
+
   async iniciarSesion(c: ContextoAuth): Promise<Response> {
     try {
       const body = await c.req.json<IniciarSesionInput>();
-      const repo = new D1UsuarioRepository(c.env.DB);
-      const passwordHasher = new Pbkdf2PasswordHasher(c.env.AUTH_PEPPER);
-      
-      const autenticador = new UsuarioAdapterParaAuth(repo);
-      const verificadorDeClave = new VerificadorDeClaveAdapter(passwordHasher);
-      
-      const tokenProvider = new HmacTokenProvider({
-        authSecret: c.env.AUTH_SECRET,
-        refreshSecret: c.env.AUTH_REFRESH_SECRET,
-        authTokenTtlSegundos: c.env.AUTH_TOKEN_TTL_SEGUNDOS ? parseInt(c.env.AUTH_TOKEN_TTL_SEGUNDOS) : 900,
-        refreshTokenTtlSegundos: c.env.REFRESH_TOKEN_TTL_SEGUNDOS ? parseInt(c.env.REFRESH_TOKEN_TTL_SEGUNDOS) : 604800,
-      });
+      const consultaCredenciales = this.deps.crearConsultaCredenciales(c.env.DB);
+      const verificadorDeClave = this.deps.crearVerificadorDeClave(c.env.AUTH_PEPPER);
+      const tokenProvider = this.deps.crearTokenProvider(c.env);
 
-      const useCase = new IniciarSesionUseCase(autenticador, verificadorDeClave, tokenProvider);
+      const useCase = new IniciarSesionUseCase(
+        consultaCredenciales,
+        verificadorDeClave,
+        tokenProvider,
+      );
       const resultado = await useCase.ejecutar(body);
 
       if (!resultado.esExito) {
@@ -70,18 +70,10 @@ export class AuthController {
   async renovarSesion(c: ContextoAuth): Promise<Response> {
     try {
       const { refreshToken } = await c.req.json<{ refreshToken: string }>();
-      const repo = new D1UsuarioRepository(c.env.DB);
-      
-      const autenticador = new UsuarioAdapterParaAuth(repo);
-      
-      const tokenProvider = new HmacTokenProvider({
-        authSecret: c.env.AUTH_SECRET,
-        refreshSecret: c.env.AUTH_REFRESH_SECRET,
-        authTokenTtlSegundos: c.env.AUTH_TOKEN_TTL_SEGUNDOS ? parseInt(c.env.AUTH_TOKEN_TTL_SEGUNDOS) : 900,
-        refreshTokenTtlSegundos: c.env.REFRESH_TOKEN_TTL_SEGUNDOS ? parseInt(c.env.REFRESH_TOKEN_TTL_SEGUNDOS) : 604800,
-      });
+      const consultaCredenciales = this.deps.crearConsultaCredenciales(c.env.DB);
+      const tokenProvider = this.deps.crearTokenProvider(c.env);
 
-      const useCase = new RenovarSesionUseCase(autenticador, tokenProvider);
+      const useCase = new RenovarSesionUseCase(consultaCredenciales, tokenProvider);
       const resultado = await useCase.ejecutar({ refreshToken });
 
       if (!resultado.esExito) {

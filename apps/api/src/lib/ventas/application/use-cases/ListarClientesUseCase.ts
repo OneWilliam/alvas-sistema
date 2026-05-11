@@ -8,7 +8,10 @@ export type ListarClientesInput = void;
 
 export type ListarClientesOutput = Cliente[];
 
-export class ListarClientesUseCase implements CasoDeUso<ListarClientesInput, Resultado<ListarClientesOutput, ErrorDeDominio>> {
+export class ListarClientesUseCase implements CasoDeUso<
+  ListarClientesInput,
+  Resultado<ListarClientesOutput, ErrorDeDominio>
+> {
   constructor(private readonly ventasRepository: IVentasRepository) {}
 
   async ejecutar(): Promise<Resultado<ListarClientesOutput, ErrorDeDominio>> {

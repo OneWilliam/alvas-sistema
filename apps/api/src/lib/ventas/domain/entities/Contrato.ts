@@ -44,14 +44,30 @@ export class Contrato {
     return new Contrato(props);
   }
 
-  get id(): IdContrato { return this.props.id; }
-  get idCliente(): IdCliente { return this.props.idCliente; }
-  get idPropiedad(): IdPropiedad { return this.props.idPropiedad; }
-  get fechaInicio(): Date { return this.props.fechaInicio; }
-  get fechaFin(): Date { return this.props.fechaFin; }
-  get estado(): ValorEstadoContrato { return this.props.estado; }
-  get creadoEn(): Date { return this.props.creadoEn; }
-  get actualizadoEn(): Date { return this.props.actualizadoEn; }
+  get id(): IdContrato {
+    return this.props.id;
+  }
+  get idCliente(): IdCliente {
+    return this.props.idCliente;
+  }
+  get idPropiedad(): IdPropiedad {
+    return this.props.idPropiedad;
+  }
+  get fechaInicio(): Date {
+    return this.props.fechaInicio;
+  }
+  get fechaFin(): Date {
+    return this.props.fechaFin;
+  }
+  get estado(): ValorEstadoContrato {
+    return this.props.estado;
+  }
+  get creadoEn(): Date {
+    return this.props.creadoEn;
+  }
+  get actualizadoEn(): Date {
+    return this.props.actualizadoEn;
+  }
 
   firmar(): void {
     if (this.props.estado !== "BORRADOR") {

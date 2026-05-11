@@ -1,4 +1,9 @@
-import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
+import {
+  type CasoDeUso,
+  resultadoExitoso,
+  resultadoFallido,
+  type Resultado,
+} from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { idLead } from "../../domain/value-objects/Ids";
@@ -9,10 +14,15 @@ import { type AsignarLeadAAsesorInputDTO } from "../dto/LeadDTOs";
 export type AsignarLeadAAsesorInput = AsignarLeadAAsesorInputDTO;
 export type AsignarLeadAAsesorOutput = void;
 
-export class AsignarLeadAAsesorUseCase implements CasoDeUso<AsignarLeadAAsesorInput, Resultado<AsignarLeadAAsesorOutput, ErrorDeDominio>> {
+export class AsignarLeadAAsesorUseCase implements CasoDeUso<
+  AsignarLeadAAsesorInput,
+  Resultado<AsignarLeadAAsesorOutput, ErrorDeDominio>
+> {
   constructor(private readonly repository: IVentasRepository) {}
 
-  async ejecutar(input: AsignarLeadAAsesorInput): Promise<Resultado<AsignarLeadAAsesorOutput, ErrorDeDominio>> {
+  async ejecutar(
+    input: AsignarLeadAAsesorInput,
+  ): Promise<Resultado<AsignarLeadAAsesorOutput, ErrorDeDominio>> {
     try {
       const lead = await this.repository.obtenerLeadPorId(idLead(input.idLead));
       if (!lead) {
@@ -22,7 +32,11 @@ export class AsignarLeadAAsesorUseCase implements CasoDeUso<AsignarLeadAAsesorIn
       lead.cambiarAsesor(idUsuarioRef(input.idAsesor));
 
       await this.repository.guardarLead(lead);
-      await this.repository.registrarActividad(lead.id, "LEAD_ASIGNADO_A_ASESOR", `Lead asignado al asesor ${input.idAsesor}`);
+      await this.repository.registrarActividad(
+        lead.id,
+        "LEAD_ASIGNADO_A_ASESOR",
+        `Lead asignado al asesor ${input.idAsesor}`,
+      );
 
       return resultadoExitoso(undefined);
     } catch (error) {

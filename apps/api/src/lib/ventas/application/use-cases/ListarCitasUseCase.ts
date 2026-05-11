@@ -8,13 +8,16 @@ export type ListarCitasInput = void;
 
 export type ListarCitasOutput = Cita[];
 
-export class ListarCitasUseCase implements CasoDeUso<ListarCitasInput, Resultado<ListarCitasOutput, ErrorDeDominio>> {
+export class ListarCitasUseCase implements CasoDeUso<
+  ListarCitasInput,
+  Resultado<ListarCitasOutput, ErrorDeDominio>
+> {
   constructor(private readonly ventasRepository: IVentasRepository) {}
 
   async ejecutar(): Promise<Resultado<ListarCitasOutput, ErrorDeDominio>> {
     try {
       const leads = await this.ventasRepository.listarLeads();
-      const citas = leads.flatMap(lead => lead.citas);
+      const citas = leads.flatMap((lead) => lead.citas);
 
       return resultadoExitoso(citas);
     } catch (error) {

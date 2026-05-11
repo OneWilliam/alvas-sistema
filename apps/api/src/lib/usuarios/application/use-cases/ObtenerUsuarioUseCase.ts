@@ -1,4 +1,9 @@
-import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
+import {
+  type CasoDeUso,
+  resultadoExitoso,
+  resultadoFallido,
+  type Resultado,
+} from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain/errors/ErrorDeDominio";
 import { type IUsuarioRepository } from "../../domain/ports/IUsuarioRepository";
 import { IdUsuario } from "../../domain/value-objects";
@@ -10,10 +15,15 @@ export type ObtenerUsuarioInput = {
 };
 export type ObtenerUsuarioOutput = UsuarioOutputDTO;
 
-export class ObtenerUsuarioUseCase implements CasoDeUso<ObtenerUsuarioInput, Resultado<ObtenerUsuarioOutput, ErrorDeDominio>> {
+export class ObtenerUsuarioUseCase implements CasoDeUso<
+  ObtenerUsuarioInput,
+  Resultado<ObtenerUsuarioOutput, ErrorDeDominio>
+> {
   constructor(private readonly usuarioRepository: IUsuarioRepository) {}
 
-  async ejecutar(input: ObtenerUsuarioInput): Promise<Resultado<ObtenerUsuarioOutput, ErrorDeDominio>> {
+  async ejecutar(
+    input: ObtenerUsuarioInput,
+  ): Promise<Resultado<ObtenerUsuarioOutput, ErrorDeDominio>> {
     try {
       const usuario = await this.usuarioRepository.obtenerPorId(new IdUsuario(input.idUsuario));
       if (!usuario) {
@@ -22,6 +32,7 @@ export class ObtenerUsuarioUseCase implements CasoDeUso<ObtenerUsuarioInput, Res
 
       const output: UsuarioOutputDTO = {
         id: usuario.id.valor,
+        username: usuario.username.valor,
         nombre: usuario.nombre.valor,
         rol: usuario.rol.valor,
         estado: usuario.estado.valor,

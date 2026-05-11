@@ -1,12 +1,20 @@
-import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
+import {
+  type CasoDeUso,
+  resultadoExitoso,
+  resultadoFallido,
+  type Resultado,
+} from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type IPasswordHasher, type IUsuarioRepository } from "../../domain/ports";
 import { Usuario } from "../../domain/entities";
-import { IdUsuario } from "../../domain/value-objects";
+import { IdUsuario, Username } from "../../domain/value-objects";
 import { UsuarioYaExisteError } from "../../domain/errors";
 import { type CrearUsuarioDTO } from "../dto/UsuarioDTOs";
 
-export class CrearUsuarioUseCase implements CasoDeUso<CrearUsuarioDTO, Resultado<Usuario, ErrorDeDominio>> {
+export class CrearUsuarioUseCase implements CasoDeUso<
+  CrearUsuarioDTO,
+  Resultado<Usuario, ErrorDeDominio>
+> {
   constructor(
     private readonly usuarioRepository: IUsuarioRepository,
     private readonly passwordHasher: IPasswordHasher,
@@ -15,15 +23,20 @@ export class CrearUsuarioUseCase implements CasoDeUso<CrearUsuarioDTO, Resultado
   async ejecutar(dto: CrearUsuarioDTO): Promise<Resultado<Usuario, ErrorDeDominio>> {
     try {
       const idUsuario = new IdUsuario(dto.idUsuario);
+      const username = new Username(dto.username);
 
-      if (await this.usuarioRepository.existePorId(idUsuario)) {
-        return resultadoFallido(new UsuarioYaExisteError(idUsuario.valor));
+      if (
+        (await this.usuarioRepository.existePorId(idUsuario)) ||
+        (await this.usuarioRepository.existePorUsername(username))
+      ) {
+        return resultadoFallido(new UsuarioYaExisteError(username.valor));
       }
 
       const hashClave = await this.passwordHasher.hashear(dto.clave);
 
       const usuario = Usuario.crear({
         id: idUsuario.valor,
+        username: username.valor,
         nombre: dto.nombre,
         hashClave: hashClave.valor,
         rol: dto.rol,

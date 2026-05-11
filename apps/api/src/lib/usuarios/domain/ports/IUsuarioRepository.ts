@@ -1,9 +1,10 @@
 import { type IRepositorioEscritura, type IRepositorioLectura } from "../../../shared/domain";
 import { Usuario } from "../entities";
-import { IdUsuario } from "../value-objects";
+import { IdUsuario, Username } from "../value-objects";
 
 export interface IUsuarioRepository
-  extends IRepositorioLectura<Usuario, IdUsuario>,
-    IRepositorioEscritura<Usuario, IdUsuario> {
+  extends IRepositorioLectura<Usuario, IdUsuario>, IRepositorioEscritura<Usuario, IdUsuario> {
   listar(): Promise<Usuario[]>;
+  obtenerPorUsername(username: Username): Promise<Usuario | null>;
+  existePorUsername(username: Username): Promise<boolean>;
 }

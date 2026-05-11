@@ -9,7 +9,10 @@ export type ListarAsesoresConLeadsOutput = {
   totalLeads: number;
 }[];
 
-export class ListarAsesoresConLeadsUseCase implements CasoDeUso<void, Resultado<ListarAsesoresConLeadsOutput, ErrorDeDominio>> {
+export class ListarAsesoresConLeadsUseCase implements CasoDeUso<
+  void,
+  Resultado<ListarAsesoresConLeadsOutput, ErrorDeDominio>
+> {
   constructor(private readonly ventasRepository: IVentasRepository) {}
 
   async ejecutar(): Promise<Resultado<ListarAsesoresConLeadsOutput, ErrorDeDominio>> {

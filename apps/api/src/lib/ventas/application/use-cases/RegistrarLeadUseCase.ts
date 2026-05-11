@@ -1,4 +1,9 @@
-import { type CasoDeUso, resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
+import {
+  type CasoDeUso,
+  resultadoExitoso,
+  resultadoFallido,
+  type Resultado,
+} from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { Lead } from "../../domain/entities/Lead";
@@ -15,7 +20,10 @@ export type RegistrarLeadInput = {
   idPropiedadInteres?: string;
 };
 
-export class RegistrarLeadUseCase implements CasoDeUso<RegistrarLeadInput, Resultado<Lead, ErrorDeDominio>> {
+export class RegistrarLeadUseCase implements CasoDeUso<
+  RegistrarLeadInput,
+  Resultado<Lead, ErrorDeDominio>
+> {
   constructor(
     private readonly repository: IVentasRepository,
     private readonly generadorId: IGeneradorId,
@@ -34,7 +42,9 @@ export class RegistrarLeadUseCase implements CasoDeUso<RegistrarLeadInput, Resul
         } else {
           // Si falla la asignación automática, podemos registrarlo sin asesor o fallar
           // Para este sistema, usaremos un asesor por defecto o lanzaremos error
-          return resultadoFallido(new ErrorDeDominio("No se pudo asignar un asesor automáticamente."));
+          return resultadoFallido(
+            new ErrorDeDominio("No se pudo asignar un asesor automáticamente."),
+          );
         }
       }
 
@@ -49,7 +59,11 @@ export class RegistrarLeadUseCase implements CasoDeUso<RegistrarLeadInput, Resul
       });
 
       await this.repository.guardarLead(lead);
-      await this.repository.registrarActividad(lead.id, "LEAD_REGISTRADO", `Lead registrado y asignado a asesor ${idAsesorFinal}`);
+      await this.repository.registrarActividad(
+        lead.id,
+        "LEAD_REGISTRADO",
+        `Lead registrado y asignado a asesor ${idAsesorFinal}`,
+      );
 
       return resultadoExitoso(lead);
     } catch (error) {

@@ -18,9 +18,9 @@
     "baseUrl": ".",
     "paths": {
       "@alvas/api/*": ["apps/api/src/*"],
-      "@alvas/web/*": ["apps/web/src/*"],
-    },
+      "@alvas/web/*": ["apps/web/src/*"]
+    }
   },
   "include": ["apps/**/*.ts"],
-  "exclude": ["node_modules", "dist", "out", ".wrangler", "coverage"],
+  "exclude": ["node_modules", "dist", "out", ".wrangler", "coverage"]
 }

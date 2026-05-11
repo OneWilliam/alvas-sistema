@@ -6,14 +6,14 @@ import { Cliente } from "../../domain/entities/Cliente";
 import { type IdLead, type IdCliente } from "../../domain/value-objects/Ids";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { type IdUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
-import { 
-  leadsTable, 
-  clientesTable, 
-  citasVentasTable, 
+import {
+  leadsTable,
+  clientesTable,
+  citasVentasTable,
   actividadVentasTable,
   type LeadRow,
   type ClienteRow,
-  type CitaVentaRow
+  type CitaVentaRow,
 } from "./schema";
 import { VentasMapper } from "./VentasMapper";
 
@@ -46,34 +46,32 @@ export class D1VentasRepository implements IVentasRepository {
 
   async guardarLead(lead: Lead): Promise<void> {
     const leadValues = VentasMapper.leadAPersistencia(lead);
-    
+
     // Batch de operaciones para atomicidad en D1
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const ops: any[] = [
-      this.drizzle()
-        .insert(leadsTable)
-        .values(leadValues)
-        .onConflictDoUpdate({
-          target: leadsTable.id,
-          set: leadValues,
-        })
+    const ops: unknown[] = [
+      this.drizzle().insert(leadsTable).values(leadValues).onConflictDoUpdate({
+        target: leadsTable.id,
+        set: leadValues,
+      }),
     ];
 
     // Sincronizar Citas
     ops.push(
       this.drizzle()
         .delete(citasVentasTable)
-        .where(eq(citasVentasTable.idLead, lead.id as string))
+        .where(eq(citasVentasTable.idLead, lead.id as string)),
     );
 
     if (lead.citas.length > 0) {
       const citasValues = lead.citas.map(VentasMapper.citaAPersistencia);
-      citasValues.forEach(val => {
+      citasValues.forEach((val) => {
         ops.push(this.drizzle().insert(citasVentasTable).values(val));
       });
     }
 
-    // @ts-expect-error - D1 batch expects specific statement types from drizzle
+    if (typeof this.db.batch !== "function") {
+      throw new Error("D1DatabaseLike.batch no esta disponible en este entorno.");
+    }
     await this.db.batch(ops);
   }
 
@@ -97,26 +95,7 @@ export class D1VentasRepository implements IVentasRepository {
       .from(leadsTable)
       .where(eq(leadsTable.idAsesor, idAsesor as string))
       .all();
-    
-    const result: Lead[] = [];
-    for (const row of rows) {
-      const citas = await this.drizzle()
-        .select()
-        .from(citasVentasTable)
-        .where(eq(citasVentasTable.idLead, row.id))
-        .all();
-      result.push(VentasMapper.leadADominio(row as LeadRow, citas as CitaVentaRow[]));
-    }
-    return result;
-  }
 
-  async listarLeadsPorIdAsesor(idAsesor: IdUsuarioRef): Promise<Lead[]> {
-    const rows = await this.drizzle()
-      .select()
-      .from(leadsTable)
-      .where(eq(leadsTable.idAsesor, idAsesor as string))
-      .all();
-    
     const result: Lead[] = [];
     for (const row of rows) {
       const citas = await this.drizzle()
@@ -135,7 +114,7 @@ export class D1VentasRepository implements IVentasRepository {
       .from(leadsTable)
       .where(eq(leadsTable.estado, estado))
       .all();
-    
+
     const result: Lead[] = [];
     for (const row of rows) {
       const citas = await this.drizzle()
@@ -161,18 +140,15 @@ export class D1VentasRepository implements IVentasRepository {
 
   async guardarCliente(cliente: Cliente): Promise<void> {
     const values = VentasMapper.clienteAPersistencia(cliente);
-    await this.drizzle()
-      .insert(clientesTable)
-      .values(values)
-      .onConflictDoUpdate({
-        target: clientesTable.id,
-        set: values,
-      });
+    await this.drizzle().insert(clientesTable).values(values).onConflictDoUpdate({
+      target: clientesTable.id,
+      set: values,
+    });
   }
 
   async listarClientes(): Promise<Cliente[]> {
     const rows = await this.drizzle().select().from(clientesTable).all();
-    return rows.map(row => VentasMapper.clienteADominio(row as ClienteRow));
+    return rows.map((row) => VentasMapper.clienteADominio(row as ClienteRow));
   }
 
   async listarClientesPorAsesor(idAsesor: IdUsuarioRef): Promise<Cliente[]> {
@@ -181,45 +157,46 @@ export class D1VentasRepository implements IVentasRepository {
       .from(clientesTable)
       .where(eq(clientesTable.idAsesor, idAsesor as string))
       .all();
-    return rows.map(row => VentasMapper.clienteADominio(row as ClienteRow));
+    return rows.map((row) => VentasMapper.clienteADominio(row as ClienteRow));
   }
 
   // --- ACTIVIDAD ---
 
   async registrarActividad(idLead: IdLead, evento: string, descripcion: string): Promise<void> {
-    await this.drizzle().insert(actividadVentasTable).values({
-      idLead: idLead as string,
-      evento,
-      descripcion,
-      fecha: new Date().toISOString(),
-    });
+    await this.drizzle()
+      .insert(actividadVentasTable)
+      .values({
+        idLead: idLead as string,
+        evento,
+        descripcion,
+        fecha: new Date().toISOString(),
+      });
   }
 
-  async obtenerActividadReciente(limite: number): Promise<{ idLead: string; evento: string; descripcion: string; fecha: string }[]> {
+  async obtenerActividadReciente(
+    limite: number,
+  ): Promise<{ idLead: string; evento: string; descripcion: string; fecha: string }[]> {
     const rows = await this.drizzle()
       .select()
       .from(actividadVentasTable)
       .orderBy(actividadVentasTable.fecha) // Usualmente sería DESC pero depende de la lógica de negocio
       .limit(limite)
       .all();
-    
+
     // Invertir si es necesario para que lo más nuevo esté primero
-    return rows.reverse().map(r => ({
+    return rows.reverse().map((r) => ({
       idLead: r.idLead,
       evento: r.evento,
       descripcion: r.descripcion,
-      fecha: r.fecha
+      fecha: r.fecha,
     }));
   }
 
   // --- ESTADÍSTICAS ---
 
   async listarAsesoresConLeads(): Promise<{ idAsesor: IdUsuarioRef; totalLeads: number }[]> {
-    const rows = await this.drizzle()
-      .select()
-      .from(leadsTable)
-      .all();
-    
+    const rows = await this.drizzle().select().from(leadsTable).all();
+
     const counts = new Map<string, number>();
     for (const row of rows) {
       const current = counts.get(row.idAsesor) || 0;

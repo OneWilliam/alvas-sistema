@@ -40,11 +40,25 @@ export class Propiedad {
     return new Propiedad(props);
   }
 
-  get id(): IdPropiedad { return this.props.id; }
-  get titulo(): string { return this.props.titulo; }
-  get descripcion(): string { return this.props.descripcion; }
-  get precio(): number { return this.props.precio; }
-  get idAsesor(): IdUsuarioRef { return this.props.idAsesor; }
-  get creadoEn(): Date { return this.props.creadoEn; }
-  get actualizadoEn(): Date { return this.props.actualizadoEn; }
+  get id(): IdPropiedad {
+    return this.props.id;
+  }
+  get titulo(): string {
+    return this.props.titulo;
+  }
+  get descripcion(): string {
+    return this.props.descripcion;
+  }
+  get precio(): number {
+    return this.props.precio;
+  }
+  get idAsesor(): IdUsuarioRef {
+    return this.props.idAsesor;
+  }
+  get creadoEn(): Date {
+    return this.props.creadoEn;
+  }
+  get actualizadoEn(): Date {
+    return this.props.actualizadoEn;
+  }
 }

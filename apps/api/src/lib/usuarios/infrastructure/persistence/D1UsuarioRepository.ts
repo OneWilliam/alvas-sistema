@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { type D1DatabaseLike } from "../../../shared/infrastructure";
 import { Usuario } from "../../domain/entities";
 import { type IUsuarioRepository } from "../../domain/ports";
-import { IdUsuario } from "../../domain/value-objects";
+import { IdUsuario, Username } from "../../domain/value-objects";
 import { obtenerDb } from "../../../shared/infrastructure/persistence/drizzle";
 import { usuariosTable, type UsuarioRow } from "./schema";
 import { UsuarioMapper } from "./UsuarioMapper";
@@ -48,6 +48,40 @@ export class D1UsuarioRepository implements IUsuarioRepository {
     }
   }
 
+  async obtenerPorUsername(username: Username): Promise<Usuario | null> {
+    try {
+      const row = await this.drizzle()
+        .select()
+        .from(usuariosTable)
+        .where(eq(usuariosTable.username, username.valor))
+        .get();
+
+      if (!row) {
+        return null;
+      }
+
+      return UsuarioMapper.aDominio(row as UsuarioRow);
+    } catch (error) {
+      console.error(`Error obtenerPorUsername(${username.valor}):`, error);
+      throw error;
+    }
+  }
+
+  async existePorUsername(username: Username): Promise<boolean> {
+    try {
+      const row = await this.drizzle()
+        .select({ username: usuariosTable.username })
+        .from(usuariosTable)
+        .where(eq(usuariosTable.username, username.valor))
+        .get();
+
+      return !!row;
+    } catch (error) {
+      console.error(`Error existePorUsername(${username.valor}):`, error);
+      throw error;
+    }
+  }
+
   async guardar(usuario: Usuario): Promise<void> {
     try {
       const ahora = new Date().toISOString();
@@ -57,6 +91,7 @@ export class D1UsuarioRepository implements IUsuarioRepository {
         .insert(usuariosTable)
         .values({
           id: usuarioPersistencia.id,
+          username: usuarioPersistencia.username,
           nombre: usuarioPersistencia.nombre,
           hashClave: usuarioPersistencia.hashClave,
           rol: usuarioPersistencia.rol,
@@ -67,6 +102,7 @@ export class D1UsuarioRepository implements IUsuarioRepository {
         .onConflictDoUpdate({
           target: usuariosTable.id,
           set: {
+            username: usuarioPersistencia.username,
             nombre: usuarioPersistencia.nombre,
             hashClave: usuarioPersistencia.hashClave,
             rol: usuarioPersistencia.rol,
@@ -82,9 +118,7 @@ export class D1UsuarioRepository implements IUsuarioRepository {
 
   async eliminarPorId(id: IdUsuario): Promise<void> {
     try {
-      await this.drizzle()
-        .delete(usuariosTable)
-        .where(eq(usuariosTable.id, id.valor));
+      await this.drizzle().delete(usuariosTable).where(eq(usuariosTable.id, id.valor));
     } catch (error) {
       console.error(`Error eliminarPorId(${id.valor}):`, error);
       throw error;
@@ -93,10 +127,7 @@ export class D1UsuarioRepository implements IUsuarioRepository {
 
   async listarTodos(): Promise<Usuario[]> {
     try {
-      const rows = await this.drizzle()
-        .select()
-        .from(usuariosTable)
-        .orderBy(usuariosTable.id);
+      const rows = await this.drizzle().select().from(usuariosTable).orderBy(usuariosTable.id);
 
       return rows.map((row) => UsuarioMapper.aDominio(row as UsuarioRow));
     } catch (error) {

@@ -1,14 +1,22 @@
 import { Hono } from "hono";
+import { type SessionClaims, verifySessionMiddleware } from "../../../shared/infrastructure";
+import { type IAutorizadorPropiedades } from "../../domain/ports";
 import { PropiedadController, type BindingsPropiedades } from "./PropiedadController";
-import { verifyTokenMiddleware } from "../../../auth/infrastructure/http/middlewares/VerifyTokenMiddleware";
 
-type SesionActiva = { idUsuario: string; rol: string };
+export type PropiedadRouterDeps = Readonly<{
+  autorizador: IAutorizadorPropiedades;
+}>;
 
-const propiedadRouter = new Hono<{ Bindings: BindingsPropiedades; Variables: { authPayload: SesionActiva } }>();
-const controller = new PropiedadController();
+export function crearPropiedadRouter(deps: PropiedadRouterDeps) {
+  const router = new Hono<{
+    Bindings: BindingsPropiedades;
+    Variables: { authPayload: SessionClaims };
+  }>();
+  const controller = new PropiedadController(deps.autorizador);
 
-propiedadRouter.use("*", verifyTokenMiddleware());
-propiedadRouter.get("/", (c) => controller.listar(c));
-propiedadRouter.post("/", (c) => controller.crear(c));
+  router.use("*", verifySessionMiddleware());
+  router.get("/", (c) => controller.listar(c));
+  router.post("/", (c) => controller.crear(c));
 
-export { propiedadRouter };
+  return router;
+}
