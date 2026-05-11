@@ -4,3 +4,4 @@ export * from "./IdUsuarioInvalidoError";
 export * from "./RolDeUsuarioInvalidoError";
 export * from "./UsuarioYaExisteError";
 export * from "./UsuarioYaDeshabilitadoError";
+export * from "./UsuarioNoEncontradoError";

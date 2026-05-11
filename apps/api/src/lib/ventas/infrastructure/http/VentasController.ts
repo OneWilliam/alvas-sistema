@@ -6,8 +6,13 @@ import {
   ConvertirLeadAClienteUseCase, 
   RegistrarClienteDirectoUseCase,
   ActualizarLeadUseCase,
-  ActualizarCitaUseCase
+  ActualizarCitaUseCase,
+  EvaluarLeadParaAsignarUseCase,
 } from "../../application";
+import {
+  ObtenerEstadisticasGlobalesUseCase,
+  ObtenerReporteGeneralUseCase
+} from "../../../reportes/application/use-cases";
 import { D1VentasRepository } from "../persistence/D1VentasRepository";
 import { UuidGeneradorId } from "../../../shared/infrastructure/security/UuidGeneradorId";
 import { idUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
@@ -25,15 +30,16 @@ type ContextoVentas = Context<{ Bindings: BindingsVentas; Variables: AppVariable
 export class VentasController {
   async registrarLead(c: ContextoVentas): Promise<Response> {
     try {
-      const body = await c.req.json<{ nombre: string; email: string; telefono: string; tipo: string; idPropiedadInteres?: string }>();
+      const body = await c.req.json<{ nombre: string; email: string; telefono: string; tipo: string; idPropiedadInteres?: string; idAsesor?: string }>();
       const authPayload = c.get("authPayload");
       const repo = new D1VentasRepository(c.env.DB);
       const generadorId = new UuidGeneradorId();
-      const useCase = new RegistrarLeadUseCase(repo, generadorId);
+      const evaluador = new EvaluarLeadParaAsignarUseCase(repo);
+      const useCase = new RegistrarLeadUseCase(repo, generadorId, evaluador);
 
       const resultado = await useCase.ejecutar({
         ...body,
-        idAsesor: authPayload.idUsuario,
+        idAsesor: body.idAsesor ?? authPayload.idUsuario,
       });
 
       if (!resultado.esExito) {
@@ -167,6 +173,32 @@ export class VentasController {
           citasCount: l.citas.length
         }))
       });
+    } catch {
+      return c.json({ success: false, message: "Error interno" }, 500);
+    }
+  }
+
+  async obtenerStats(c: ContextoVentas): Promise<Response> {
+    try {
+      const repo = new D1VentasRepository(c.env.DB);
+      const useCase = new ObtenerEstadisticasGlobalesUseCase(repo);
+      const resultado = await useCase.ejecutar();
+      
+      if (!resultado.esExito) return c.json({ success: false, message: resultado.error.message }, 400);
+      return c.json({ success: true, data: resultado.valor });
+    } catch {
+      return c.json({ success: false, message: "Error interno" }, 500);
+    }
+  }
+
+  async obtenerReporte(c: ContextoVentas): Promise<Response> {
+    try {
+      const repo = new D1VentasRepository(c.env.DB);
+      const useCase = new ObtenerReporteGeneralUseCase(repo);
+      const resultado = await useCase.ejecutar();
+      
+      if (!resultado.esExito) return c.json({ success: false, message: resultado.error.message }, 400);
+      return c.json({ success: true, data: resultado.valor });
     } catch {
       return c.json({ success: false, message: "Error interno" }, 500);
     }

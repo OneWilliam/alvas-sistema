@@ -11,3 +11,6 @@ export const idCliente = (valor: string): IdCliente => valor as IdCliente;
 
 export type IdContrato = Marca<string, "IdContrato">;
 export const idContrato = (valor: string): IdContrato => valor as IdContrato;
+
+export type IdPropiedad = Marca<string, "IdPropiedad">;
+export const idPropiedad = (valor: string): IdPropiedad => valor as IdPropiedad;

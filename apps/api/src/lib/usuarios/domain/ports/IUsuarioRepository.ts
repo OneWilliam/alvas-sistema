@@ -4,4 +4,6 @@ import { IdUsuario } from "../value-objects";
 
 export interface IUsuarioRepository
   extends IRepositorioLectura<Usuario, IdUsuario>,
-    IRepositorioEscritura<Usuario, IdUsuario> {}
+    IRepositorioEscritura<Usuario, IdUsuario> {
+  listar(): Promise<Usuario[]>;
+}

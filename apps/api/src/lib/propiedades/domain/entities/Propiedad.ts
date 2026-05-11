@@ -1,5 +1,4 @@
-import { idPropiedad, type IdPropiedad } from "../value-objects";
-import { type IdUsuarioRef } from "../value-objects";
+import { idPropiedad, type IdPropiedad, type IdUsuarioRef } from "../value-objects";
 
 type PropsPropiedad = {
   id: IdPropiedad;

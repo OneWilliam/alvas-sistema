@@ -47,24 +47,34 @@ export class D1VentasRepository implements IVentasRepository {
   async guardarLead(lead: Lead): Promise<void> {
     const leadValues = VentasMapper.leadAPersistencia(lead);
     
-    // Guardar Lead
-    await this.drizzle()
-      .insert(leadsTable)
-      .values(leadValues)
-      .onConflictDoUpdate({
-        target: leadsTable.id,
-        set: leadValues,
-      });
+    // Batch de operaciones para atomicidad en D1
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ops: any[] = [
+      this.drizzle()
+        .insert(leadsTable)
+        .values(leadValues)
+        .onConflictDoUpdate({
+          target: leadsTable.id,
+          set: leadValues,
+        })
+    ];
 
-    // Guardar Citas (Sincronización simple: borrar y re-insertar para este MVP)
-    await this.drizzle()
-      .delete(citasVentasTable)
-      .where(eq(citasVentasTable.idLead, lead.id as string));
+    // Sincronizar Citas
+    ops.push(
+      this.drizzle()
+        .delete(citasVentasTable)
+        .where(eq(citasVentasTable.idLead, lead.id as string))
+    );
 
     if (lead.citas.length > 0) {
       const citasValues = lead.citas.map(VentasMapper.citaAPersistencia);
-      await this.drizzle().insert(citasVentasTable).values(citasValues);
+      citasValues.forEach(val => {
+        ops.push(this.drizzle().insert(citasVentasTable).values(val));
+      });
     }
+
+    // @ts-expect-error - D1 batch expects specific statement types from drizzle
+    await this.db.batch(ops);
   }
 
   async listarLeads(): Promise<Lead[]> {
@@ -86,6 +96,44 @@ export class D1VentasRepository implements IVentasRepository {
       .select()
       .from(leadsTable)
       .where(eq(leadsTable.idAsesor, idAsesor as string))
+      .all();
+    
+    const result: Lead[] = [];
+    for (const row of rows) {
+      const citas = await this.drizzle()
+        .select()
+        .from(citasVentasTable)
+        .where(eq(citasVentasTable.idLead, row.id))
+        .all();
+      result.push(VentasMapper.leadADominio(row as LeadRow, citas as CitaVentaRow[]));
+    }
+    return result;
+  }
+
+  async listarLeadsPorIdAsesor(idAsesor: IdUsuarioRef): Promise<Lead[]> {
+    const rows = await this.drizzle()
+      .select()
+      .from(leadsTable)
+      .where(eq(leadsTable.idAsesor, idAsesor as string))
+      .all();
+    
+    const result: Lead[] = [];
+    for (const row of rows) {
+      const citas = await this.drizzle()
+        .select()
+        .from(citasVentasTable)
+        .where(eq(citasVentasTable.idLead, row.id))
+        .all();
+      result.push(VentasMapper.leadADominio(row as LeadRow, citas as CitaVentaRow[]));
+    }
+    return result;
+  }
+
+  async listarLeadsPorEstado(estado: string): Promise<Lead[]> {
+    const rows = await this.drizzle()
+      .select()
+      .from(leadsTable)
+      .where(eq(leadsTable.estado, estado))
       .all();
     
     const result: Lead[] = [];
@@ -145,5 +193,42 @@ export class D1VentasRepository implements IVentasRepository {
       descripcion,
       fecha: new Date().toISOString(),
     });
+  }
+
+  async obtenerActividadReciente(limite: number): Promise<{ idLead: string; evento: string; descripcion: string; fecha: string }[]> {
+    const rows = await this.drizzle()
+      .select()
+      .from(actividadVentasTable)
+      .orderBy(actividadVentasTable.fecha) // Usualmente sería DESC pero depende de la lógica de negocio
+      .limit(limite)
+      .all();
+    
+    // Invertir si es necesario para que lo más nuevo esté primero
+    return rows.reverse().map(r => ({
+      idLead: r.idLead,
+      evento: r.evento,
+      descripcion: r.descripcion,
+      fecha: r.fecha
+    }));
+  }
+
+  // --- ESTADÍSTICAS ---
+
+  async listarAsesoresConLeads(): Promise<{ idAsesor: IdUsuarioRef; totalLeads: number }[]> {
+    const rows = await this.drizzle()
+      .select()
+      .from(leadsTable)
+      .all();
+    
+    const counts = new Map<string, number>();
+    for (const row of rows) {
+      const current = counts.get(row.idAsesor) || 0;
+      counts.set(row.idAsesor, current + 1);
+    }
+
+    return Array.from(counts.entries()).map(([idAsesor, totalLeads]) => ({
+      idAsesor: idAsesor as IdUsuarioRef,
+      totalLeads,
+    }));
   }
 }

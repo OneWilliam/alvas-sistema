@@ -1,11 +1,12 @@
 import { Lead } from "../../domain/entities/Lead";
-import { Cita, type ValorEstadoCita } from "../../domain/entities/Cita";
+import { Cita } from "../../domain/entities/Cita";
 import { Cliente } from "../../domain/entities/Cliente";
-import { idLead, idCita, idCliente } from "../../domain/value-objects/Ids";
+import { type ValorEstadoCita } from "../../domain/entities/Cita";
 import { EstadoLead } from "../../domain/value-objects/EstadoLead";
 import { TipoVenta } from "../../domain/value-objects/TipoVenta";
 import { idUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
 import { type LeadRow, type ClienteRow, type CitaVentaRow } from "./schema";
+import { idLead, idCita, idCliente, idPropiedad } from "../../domain/value-objects/Ids";
 
 export class VentasMapper {
   static leadADominio(row: LeadRow, citasRows: CitaVentaRow[]): Lead {
@@ -18,7 +19,7 @@ export class VentasMapper {
       estado: new EstadoLead(row.estado),
       idAsesor: idUsuarioRef(row.idAsesor),
       idCliente: row.idCliente ? idCliente(row.idCliente) : undefined,
-      idPropiedadInteres: row.idPropiedadInteres ?? undefined,
+      idPropiedadInteres: row.idPropiedadInteres ? idPropiedad(row.idPropiedadInteres) : undefined,
       citas: citasRows.map((r) => this.citaADominio(r)),
       creadoEn: new Date(row.creadoEn),
       actualizadoEn: new Date(row.actualizadoEn),
@@ -34,8 +35,8 @@ export class VentasMapper {
       tipo: lead.tipo.valor,
       estado: lead.estado.valor,
       idAsesor: lead.idAsesor as string,
-      idCliente: lead.idCliente as string | undefined,
-      idPropiedadInteres: lead.idPropiedadInteres,
+      idCliente: lead.idCliente ? (lead.idCliente as string) : undefined,
+      idPropiedadInteres: lead.idPropiedadInteres ? (lead.idPropiedadInteres as string) : undefined,
       creadoEn: lead.creadoEn.toISOString(),
       actualizadoEn: lead.actualizadoEn.toISOString(),
     };
@@ -85,7 +86,7 @@ export class VentasMapper {
       email: cliente.email,
       telefono: cliente.telefono,
       idAsesor: cliente.idAsesor as string,
-      idLeadOrigen: cliente.idLeadOrigen as string | undefined,
+      idLeadOrigen: cliente.idLeadOrigen,
       creadoEn: cliente.creadoEn.toISOString(),
       actualizadoEn: cliente.actualizadoEn.toISOString(),
     };

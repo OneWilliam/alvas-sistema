@@ -9,6 +9,8 @@ export interface IVentasRepository {
   guardarLead(lead: Lead): Promise<void>;
   listarLeads(): Promise<Lead[]>;
   listarLeadsPorAsesor(idAsesor: IdUsuarioRef): Promise<Lead[]>;
+  listarLeadsPorIdAsesor(idAsesor: IdUsuarioRef): Promise<Lead[]>;
+  listarLeadsPorEstado(estado: string): Promise<Lead[]>;
 
   // Gestión de Clientes
   obtenerClientePorId(id: IdCliente): Promise<Cliente | null>;
@@ -18,4 +20,8 @@ export interface IVentasRepository {
 
   // Actividad
   registrarActividad(idLead: IdLead, evento: string, descripcion: string): Promise<void>;
+  obtenerActividadReciente(limite: number): Promise<{ idLead: string; evento: string; descripcion: string; fecha: string }[]>;
+
+  // Estadísticas y Reportes
+  listarAsesoresConLeads(): Promise<{ idAsesor: IdUsuarioRef; totalLeads: number }[]>;
 }

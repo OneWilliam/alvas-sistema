@@ -32,7 +32,7 @@ type ReconstituirUsuarioParams = {
 
 export class Usuario {
   private readonly idInterno: IdUsuario;
-  private readonly nombreInterno: Nombre;
+  private nombreInterno: Nombre;
   private hashClaveInterna: HashClave;
   private rolInterno: Rol;
   private estadoInterno: EstadoUsuario;
@@ -112,6 +112,11 @@ export class Usuario {
 
   cambiarRol(nuevoRol: string): void {
     this.rolInterno = new Rol(nuevoRol);
+    this.actualizadoEnInterno = new Date();
+  }
+
+  cambiarNombre(nuevoNombre: string): void {
+    this.nombreInterno = new Nombre(nuevoNombre);
     this.actualizadoEnInterno = new Date();
   }
 

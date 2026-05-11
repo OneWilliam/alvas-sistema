@@ -152,4 +152,8 @@ export class D1UsuarioRepository implements IUsuarioRepository {
       throw error;
     }
   }
+
+  async listar(): Promise<Usuario[]> {
+    return this.listarTodos();
+  }
 }

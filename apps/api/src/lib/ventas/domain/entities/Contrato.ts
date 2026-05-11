@@ -1,4 +1,4 @@
-import { type IdContrato, type IdCliente } from "../value-objects/Ids";
+import { type IdContrato, type IdCliente, type IdPropiedad } from "../value-objects/Ids";
 import { ErrorDeValidacion } from "../../../shared/domain";
 
 export const ESTADOS_CONTRATO = ["BORRADOR", "VIGENTE", "FINALIZADO", "CANCELADO"] as const;
@@ -7,7 +7,7 @@ export type ValorEstadoContrato = (typeof ESTADOS_CONTRATO)[number];
 export type PropsContrato = {
   id: IdContrato;
   idCliente: IdCliente;
-  idPropiedad: string;
+  idPropiedad: IdPropiedad;
   fechaInicio: Date;
   fechaFin: Date;
   estado: ValorEstadoContrato;
@@ -23,13 +23,17 @@ export class Contrato {
   static crear(params: {
     id: IdContrato;
     idCliente: IdCliente;
-    idPropiedad: string;
+    idPropiedad: IdPropiedad;
     fechaInicio: Date;
     fechaFin: Date;
   }): Contrato {
     const ahora = new Date();
     return new Contrato({
-      ...params,
+      id: params.id,
+      idCliente: params.idCliente,
+      idPropiedad: params.idPropiedad,
+      fechaInicio: params.fechaInicio,
+      fechaFin: params.fechaFin,
       estado: "BORRADOR",
       creadoEn: ahora,
       actualizadoEn: ahora,
@@ -42,10 +46,12 @@ export class Contrato {
 
   get id(): IdContrato { return this.props.id; }
   get idCliente(): IdCliente { return this.props.idCliente; }
-  get idPropiedad(): string { return this.props.idPropiedad; }
+  get idPropiedad(): IdPropiedad { return this.props.idPropiedad; }
   get fechaInicio(): Date { return this.props.fechaInicio; }
   get fechaFin(): Date { return this.props.fechaFin; }
   get estado(): ValorEstadoContrato { return this.props.estado; }
+  get creadoEn(): Date { return this.props.creadoEn; }
+  get actualizadoEn(): Date { return this.props.actualizadoEn; }
 
   firmar(): void {
     if (this.props.estado !== "BORRADOR") {
