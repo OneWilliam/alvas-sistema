@@ -21,10 +21,10 @@ migrations_dir = "drizzle"
 AUTH_TOKEN_TTL_SEGUNDOS = "900"
 REFRESH_TOKEN_TTL_SEGUNDOS = "604800"
 
-[[env.testing.d1_databases]]
+[[env.staging.d1_databases]]
 binding = "DB"
-database_name = "alvas-test"
-database_id = "a047b705-a4b8-4412-b8f7-7b9ef66f6e19"
+database_name = "alvas-staging"
+database_id = "749211d9-70f1-429d-a08c-592af8ed5ef4"
 migrations_dir = "drizzle"
 
 # --- ENTORNO PRODUCCIÓN ---
@@ -36,5 +36,5 @@ REFRESH_TOKEN_TTL_SEGUNDOS = "604800"
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "alvas-main"
-database_id = "ONE_TWO-THREE-FOUR-FIVE_NVM"
+database_id = "5a204ddb-0dc0-41da-9cfc-38e985debe67"
 migrations_dir = "drizzle"
