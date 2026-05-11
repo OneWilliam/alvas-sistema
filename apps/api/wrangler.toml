@@ -17,7 +17,7 @@ migrations_dir = "drizzle"
 # --- ENTORNO STAGING ---
 
 [env.staging]
-name = "alvas-api"
+name = "alvas-api-staging"
 [env.staging.vars]
 AUTH_TOKEN_TTL_SEGUNDOS = "900"
 REFRESH_TOKEN_TTL_SEGUNDOS = "604800"
@@ -30,6 +30,7 @@ migrations_dir = "drizzle"
 
 # --- ENTORNO PRODUCCIÓN ---
 [env.production]
+name = "alvas-api"
 [env.production.vars]
 AUTH_TOKEN_TTL_SEGUNDOS = "900"
 REFRESH_TOKEN_TTL_SEGUNDOS = "604800"
