@@ -7,15 +7,16 @@ import { type Lead } from "../../src/lib/ventas/domain/entities/Lead";
 import { type Cita } from "../../src/lib/ventas/domain/entities/Cita";
 import { type Cliente } from "../../src/lib/ventas/domain/entities/Cliente";
 import { type Contrato } from "../../src/lib/ventas/domain/entities/Contrato";
-import { type IdLead } from "../../src/lib/ventas/domain/value-objects/Ids";
-import { type IEvaluadorAsignacion } from "../../src/lib/ventas/domain/services/EvaluadorAsignacion";
-import { resultadoExitoso, resultadoFallido } from "../../src/lib/shared";
+import { type IdLead, type IdCliente } from "../../src/lib/ventas/domain/value-objects/Ids";
+import { type IEvaluadorAsignacion, type AsesorStat } from "../../src/lib/ventas/domain/services/EvaluadorAsignacion";
+import { resultadoExitoso, resultadoFallido, type Resultado } from "../../src/lib/shared";
 import { ErrorDeDominio } from "../../src/lib/shared/domain";
-import { idUsuarioRef } from "../../src/lib/shared/domain/value-objects/IdUsuarioRef";
+import { idUsuarioRef, type IdUsuarioRef } from "../../src/lib/shared/domain/value-objects/IdUsuarioRef";
 
 class MockVentasRepository implements IVentasRepository {
   async obtenerCitaPorId(): Promise<Cita | undefined> { return undefined; }
-  async obtenerClientePorId(): Promise<Cliente | undefined> { return undefined; }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async obtenerClientePorId(_id: IdCliente): Promise<Cliente | null> { return null; }
   async obtenerContratoPorId(): Promise<Contrato | undefined> { return undefined; }
   async guardarCita(): Promise<void> {}
   async guardarCliente(): Promise<void> {}
@@ -27,16 +28,20 @@ class MockVentasRepository implements IVentasRepository {
   async listarContratos(): Promise<Contrato[]> { return []; }
   async listarPropiedadesPorCliente(): Promise<{ idPropiedad: string }[]> { return []; }
   async buscarAsesorConMenosLeads(): Promise<string | undefined> { return undefined; }
+  async listarLeadsPorEstado(): Promise<Lead[]> { return []; }
+  async listarClientesPorAsesor(): Promise<Cliente[]> { return []; }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async obtenerActividadReciente(_limite: number): Promise<{ idLead: string; evento: string; descripcion: string; fecha: string; }[]> { return []; }
   
   public leads: Lead[] = [];
   async guardarLead(lead: Lead): Promise<void> {
     this.leads.push(lead);
   }
-  async obtenerLeadPorId(id: IdLead): Promise<Lead | undefined> {
-    return this.leads.find(l => l.id === id);
+  async obtenerLeadPorId(id: IdLead): Promise<Lead | null> {
+    return this.leads.find(l => l.id === id) || null;
   }
   async registrarActividad(): Promise<void> {}
-  async listarAsesoresConLeads(): Promise<{ idAsesor: string; totalLeads: number }[]> {
+  async listarAsesoresConLeads(): Promise<{ idAsesor: IdUsuarioRef; totalLeads: number }[]> {
     return []; // Para simular que no hay asesores
   }
 }
@@ -52,7 +57,8 @@ class MockEvaluadorAsignacion implements IEvaluadorAsignacion {
   constructor(debeFallar: boolean = false) {
     this.debeFallar = debeFallar;
   }
-  async evaluar(): Promise<Resultado<IdUsuarioRef, ErrorDeDominio>> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  evaluar(_stats: AsesorStat[]): Resultado<IdUsuarioRef, ErrorDeDominio> {
     if (this.debeFallar) {
       return resultadoFallido(new ErrorDeDominio("No hay asesores disponibles"));
     }
@@ -95,5 +101,9 @@ Then('el sistema lo registra como un nuevo lead', function () {
 });
 
 Then('el estado inicial del lead es {string}', function (estadoEsperado: string) {
-  assert.strictEqual(resultado.valor.estado.valor, estadoEsperado);
+  if (resultado.esExito) {
+    assert.strictEqual(resultado.valor.estado.valor, estadoEsperado);
+  } else {
+    assert.fail("El resultado debió ser exitoso");
+  }
 });

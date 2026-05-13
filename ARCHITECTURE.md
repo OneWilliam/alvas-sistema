@@ -302,10 +302,12 @@ Otros use cases existentes:
 - `ListarCitasUseCase`
 - `ListarAsesoresConLeadsUseCase`
 - `FirmarContratoUseCase`
-- `EvaluarLeadParaAsignarUseCase`
 - `CrearContratoUseCase`
 - `AsignarLeadAAsesorUseCase`
 - `ActualizarClienteUseCase`
+
+Servicios de Dominio:
+- `EvaluadorAsignacionService`
 
 Puertos primarios implementados:
 - `IActualizarCliente`

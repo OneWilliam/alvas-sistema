@@ -32,7 +32,8 @@ export class RegistrarLeadUseCase implements CasoDeUso<
 
       // Si no se provee asesor, asignar automáticamente
       if (!idAsesorFinal) {
-        const resultadoAsignacion = await this.evaluarAsignacion.evaluar(this.repository);
+        const stats = await this.repository.listarAsesoresConLeads();
+        const resultadoAsignacion = this.evaluarAsignacion.evaluar(stats);
         if (resultadoAsignacion.esExito) {
           idAsesorFinal = resultadoAsignacion.valor;
         } else {
