@@ -3,7 +3,6 @@ import {
   ActualizarLeadUseCase,
   AgendarCitaUseCase,
   ConvertirLeadAClienteUseCase,
-  EvaluarLeadParaAsignarUseCase,
   ListarLeadsPorAsesorUseCase,
   RegistrarClienteDirectoUseCase,
   RegistrarLeadUseCase,
@@ -12,10 +11,11 @@ import {
 import { D1VentasRepository, type VentasControllerDeps } from "../lib/ventas/infrastructure";
 import { type D1DatabaseLike } from "../lib/shared/infrastructure";
 import { UuidGeneradorId } from "../lib/shared/infrastructure/security/UuidGeneradorId";
+import { EvaluadorAsignacionService } from "../lib/ventas/domain/services/IEvaluadorAsignacion";
 
 export function crearRegistrarLeadUseCase(db: D1DatabaseLike): IRegistrarLead {
   const repo = new D1VentasRepository(db);
-  return new RegistrarLeadUseCase(repo, new UuidGeneradorId(), new EvaluarLeadParaAsignarUseCase(repo));
+  return new RegistrarLeadUseCase(repo, new UuidGeneradorId(), new EvaluadorAsignacionService());
 }
 
 export function crearVentasControllerDeps(): VentasControllerDeps {

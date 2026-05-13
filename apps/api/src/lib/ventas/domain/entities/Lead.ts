@@ -107,7 +107,7 @@ export class Lead {
   }
 
   convertirACliente(idCliente: IdCliente): void {
-    if (this.props.estado === EstadoLead.convertido()) {
+    if (this.props.estado.valor === "CONVERTIDO") {
       throw new ErrorDeValidacion("El lead ya ha sido convertido a cliente.");
     }
     this.props.estado = EstadoLead.convertido();

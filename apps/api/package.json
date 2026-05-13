@@ -9,8 +9,11 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260503.1",
+    "@cucumber/cucumber": "^12.8.3",
     "@types/bun": "latest",
-    "@types/uuid": "^11.0.0"
+    "@types/uuid": "^11.0.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0"
   },
   "peerDependencies": {
     "typescript": "^5"
