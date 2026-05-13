@@ -10,7 +10,7 @@ import { Lead } from "../../domain/entities/Lead";
 import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
 import { type IRegistrarLead } from "../ports/in";
 import { type RegistrarLeadInputDTO } from "../dto/LeadDTOs";
-import { type IEvaluadorAsignacion } from "../../domain/services/IEvaluadorAsignacion";
+import { type IEvaluadorAsignacion } from "../../domain/services/EvaluadorAsignacion";
 
 export type RegistrarLeadInput = RegistrarLeadInputDTO;
 
@@ -34,7 +34,7 @@ export class RegistrarLeadUseCase implements CasoDeUso<
       if (!idAsesorFinal) {
         const resultadoAsignacion = await this.evaluarAsignacion.evaluar(this.repository);
         if (resultadoAsignacion.esExito) {
-          idAsesorFinal = resultadoAsignacion.valor as string;
+          idAsesorFinal = resultadoAsignacion.valor;
         } else {
           // Si falla la asignación automática, podemos registrarlo sin asesor o fallar
           // Para este sistema, usaremos un asesor por defecto o lanzaremos error

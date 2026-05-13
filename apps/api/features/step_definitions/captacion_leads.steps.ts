@@ -8,7 +8,7 @@ import { type Cita } from "../../src/lib/ventas/domain/entities/Cita";
 import { type Cliente } from "../../src/lib/ventas/domain/entities/Cliente";
 import { type Contrato } from "../../src/lib/ventas/domain/entities/Contrato";
 import { type IdLead } from "../../src/lib/ventas/domain/value-objects/Ids";
-import { type IEvaluadorAsignacion } from "../../src/lib/ventas/domain/services/IEvaluadorAsignacion";
+import { type IEvaluadorAsignacion } from "../../src/lib/ventas/domain/services/EvaluadorAsignacion";
 import { resultadoExitoso, resultadoFallido } from "../../src/lib/shared";
 import { ErrorDeDominio } from "../../src/lib/shared/domain";
 import { idUsuarioRef } from "../../src/lib/shared/domain/value-objects/IdUsuarioRef";
@@ -70,19 +70,23 @@ Given('que el negocio no tiene asesores disponibles', function () {
   casoDeUso = new RegistrarLeadUseCase(repository, new MockGeneradorId(), evaluador);
 });
 
-When('un nuevo prospecto {string} con correo {string} solicita informacion sobre ventas', async function (nombre: string, email: string) {
-  // Aquí simulamos que se ingresa con un asesor genérico por defecto en caso de falla
-  // o arreglamos el test para que el UseCase permita asesor por defecto.
-  // Vamos a usar un evaluador que SI retorna un asesor para que el test sea verde
-  const evaluador = new MockEvaluadorAsignacion(false); 
+Given('que el negocio tiene asesores disponibles', function () {
+  repository = new MockVentasRepository();
+  const evaluador = new MockEvaluadorAsignacion(false); // Hay asesores
   casoDeUso = new RegistrarLeadUseCase(repository, new MockGeneradorId(), evaluador);
-  
+});
+
+When('un nuevo prospecto {string} con correo {string} solicita informacion sobre ventas', async function (nombre: string, email: string) {
   resultado = await casoDeUso.ejecutar({
     nombre,
     email,
     telefono: "123456789",
     tipo: "VENTA"
   });
+});
+
+Then('el sistema no lo registra y falla por falta de asesores', function () {
+  assert.strictEqual(resultado.esExito, false);
 });
 
 Then('el sistema lo registra como un nuevo lead', function () {

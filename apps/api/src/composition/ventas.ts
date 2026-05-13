@@ -11,7 +11,7 @@ import {
 import { D1VentasRepository, type VentasControllerDeps } from "../lib/ventas/infrastructure";
 import { type D1DatabaseLike } from "../lib/shared/infrastructure";
 import { UuidGeneradorId } from "../lib/shared/infrastructure/security/UuidGeneradorId";
-import { EvaluadorAsignacionService } from "../lib/ventas/domain/services/IEvaluadorAsignacion";
+import { EvaluadorAsignacionService } from "../lib/ventas/domain/services/EvaluadorAsignacion";
 
 export function crearRegistrarLeadUseCase(db: D1DatabaseLike): IRegistrarLead {
   const repo = new D1VentasRepository(db);

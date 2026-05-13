@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "wrangler dev",
     "test": "bun test",
+    "test:bdd": "cross-env NODE_OPTIONS=\"--import tsx\" cucumber-js --import \"features/**/*.ts\"",
     "build": "echo 'No build step needed for Wrangler'"
   },
   "devDependencies": {
@@ -12,6 +13,7 @@
     "@cucumber/cucumber": "^12.8.3",
     "@types/bun": "latest",
     "@types/uuid": "^11.0.0",
+    "cross-env": "^10.1.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0"
   },
