@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 
 import { CrearUsuarioUseCase } from "../../../src/lib/usuarios/application/use-cases/CrearUsuarioUseCase";
 import { Usuario } from "../../../src/lib/usuarios/domain/entities";
@@ -56,7 +56,11 @@ class FakePasswordHasher implements IPasswordHasher {
 describe("usuarios / CrearUsuarioUseCase", () => {
   test("guarda usuario con hash generado", async () => {
     const repo = new FakeUsuarioRepository();
-    const resultado = await new CrearUsuarioUseCase(repo, new FakePasswordHasher()).ejecutar({
+    const passwordHasher = new FakePasswordHasher();
+    const hashearSpy = mock(passwordHasher.hashear.bind(passwordHasher));
+    passwordHasher.hashear = hashearSpy;
+
+    const resultado = await new CrearUsuarioUseCase(repo, passwordHasher).ejecutar({
       idUsuario: "user-001",
       username: "Asesor1",
       nombre: "Asesor Uno",
@@ -66,6 +70,7 @@ describe("usuarios / CrearUsuarioUseCase", () => {
 
     expect(resultado.esExito).toBe(true);
     expect(repo.usuarios.size).toBe(1);
+    expect(hashearSpy).toHaveBeenCalledTimes(1);
     if (resultado.esExito) {
       expect(resultado.valor.username.valor).toBe("asesor1");
       expect(resultado.valor.hashClave.valor).toBe("hash-seguro-001");

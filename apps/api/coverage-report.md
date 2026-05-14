@@ -1,11 +1,11 @@
-# Reporte de Cobertura - Semana 05
+# Reporte de Cobertura
 
 ## Comandos Ejecutados
 
 ```bash
 bun test --coverage
 bun run typecheck
-bun --cwd apps/api test:bdd
+bun run lint
 ```
 
 ## Alcance Cubierto
@@ -15,27 +15,23 @@ bun --cwd apps/api test:bdd
 - Entidades/agregados: `Usuario`, `Sesion`, `Lead`, `Cita`, `Contrato`, `Captacion`.
 - Servicio de dominio: `EvaluadorAsignacionService`.
 - Casos de uso con fakes in-memory: `CrearUsuarioUseCase`, `IniciarSesionUseCase`, `AgendarCitaUseCase`, `ConvertirLeadAClienteUseCase`.
-- Escenarios BDD para captación de leads, agendamiento de cita y conversión de lead a cliente.
+- Mocks/spies con `mock()` de Bun para verificar interacciones con puertos de salida.
 
 ## Resultado Actual
 
 ```text
 bun test --coverage
-29 pass
-0 fail
-77 expect() calls
-15 test files
-All files: 86.72% funcs, 91.98% lines
-
-bun --cwd apps/api test:bdd
-6 scenarios passed
-20 steps passed
+29 pruebas pasan
+0 pruebas fallan
+79 expect() calls
+15 archivos de prueba
+Cobertura total reportada: 86.72% funciones, 92.00% lineas
 
 bun run typecheck
-OK
+Pasa
 
 bun run lint
-OK
+Pasa
 ```
 
 ## Lectura de la Cobertura
@@ -48,6 +44,6 @@ La ejecución debe finalizar con:
 
 - Tests unitarios y de aplicación en verde.
 - Typecheck en verde.
-- Escenarios BDD en verde.
+- Lint en verde.
 
 Actualizar este archivo si se agregan nuevos bounded contexts, casos de uso o reglas de dominio críticas.

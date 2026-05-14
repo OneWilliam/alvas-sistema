@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 
 import { type IGeneradorId } from "../../../src/lib/shared/domain/ports/IGeneradorId";
 import {
@@ -93,6 +93,8 @@ describe("ventas / use cases", () => {
   test("AgendarCitaUseCase agrega cita al lead y registra actividad", async () => {
     const repo = new FakeVentasRepository();
     await repo.guardarLead(crearLead());
+    const registrarActividadSpy = mock(repo.registrarActividad.bind(repo));
+    repo.registrarActividad = registrarActividadSpy;
 
     const resultado = await new AgendarCitaUseCase(
       repo,
@@ -107,6 +109,7 @@ describe("ventas / use cases", () => {
     expect(resultado.esExito).toBe(true);
     expect(lead?.citas).toHaveLength(1);
     expect(repo.actividades).toContain("CITA_AGENDADA");
+    expect(registrarActividadSpy).toHaveBeenCalledTimes(1);
   });
 
   test("ConvertirLeadAClienteUseCase crea cliente y cierra lead", async () => {
