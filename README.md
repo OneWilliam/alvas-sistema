@@ -22,7 +22,7 @@ apps/api/src/lib/<modulo>/
   infrastructure/
 ```
 
-Modulos base definidos: `shared`, `usuarios`, `auth`, `leads`, `propiedades`, `citas`, `ventas`, `reportes`.
+Modulos base definidos: `shared`, `usuarios`, `auth`, `propiedades`, `ventas`, `reportes`, `integraciones`.
 
 ## Convenciones DDD + Hexagonal
 

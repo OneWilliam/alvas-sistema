@@ -5,12 +5,17 @@
   "scripts": {
     "dev": "wrangler dev",
     "test": "bun test",
+    "test:bdd": "cross-env NODE_OPTIONS=\"--import tsx\" cucumber-js \"test/bdd/features/**/*.feature\" --import \"test/bdd/features/**/*.ts\"",
     "build": "echo 'No build step needed for Wrangler'"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260503.1",
+    "@cucumber/cucumber": "^12.8.3",
     "@types/bun": "latest",
-    "@types/uuid": "^11.0.0"
+    "@types/uuid": "^11.0.0",
+    "cross-env": "^10.1.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0"
   },
   "peerDependencies": {
     "typescript": "^5"

@@ -4,5 +4,5 @@
     "lib": ["ESNext", "DOM", "WebWorker"],
     "types": ["bun-types"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts"]
 }

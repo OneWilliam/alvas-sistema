@@ -7,19 +7,12 @@ import {
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { Lead } from "../../domain/entities/Lead";
-import { idUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
 import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
-import { EvaluarLeadParaAsignarUseCase } from "./EvaluarLeadParaAsignarUseCase";
 import { type IRegistrarLead } from "../ports/in";
+import { type RegistrarLeadInputDTO } from "../dto/LeadDTOs";
+import { type IEvaluadorAsignacion } from "../../domain/services/EvaluadorAsignacion";
 
-export type RegistrarLeadInput = {
-  nombre: string;
-  email: string;
-  telefono: string;
-  tipo: string;
-  idAsesor?: string;
-  idPropiedadInteres?: string;
-};
+export type RegistrarLeadInput = RegistrarLeadInputDTO;
 
 export class RegistrarLeadUseCase implements CasoDeUso<
   RegistrarLeadInput,
@@ -30,7 +23,7 @@ export class RegistrarLeadUseCase implements CasoDeUso<
   constructor(
     private readonly repository: IVentasRepository,
     private readonly generadorId: IGeneradorId,
-    private readonly evaluarAsignacion: EvaluarLeadParaAsignarUseCase,
+    private readonly evaluarAsignacion: IEvaluadorAsignacion,
   ) {}
 
   async ejecutar(input: RegistrarLeadInput): Promise<Resultado<Lead, ErrorDeDominio>> {
@@ -39,9 +32,10 @@ export class RegistrarLeadUseCase implements CasoDeUso<
 
       // Si no se provee asesor, asignar automáticamente
       if (!idAsesorFinal) {
-        const resultadoAsignacion = await this.evaluarAsignacion.ejecutar();
+        const stats = await this.repository.listarAsesoresConLeads();
+        const resultadoAsignacion = this.evaluarAsignacion.evaluar(stats);
         if (resultadoAsignacion.esExito) {
-          idAsesorFinal = resultadoAsignacion.valor as string;
+          idAsesorFinal = resultadoAsignacion.valor;
         } else {
           // Si falla la asignación automática, podemos registrarlo sin asesor o fallar
           // Para este sistema, usaremos un asesor por defecto o lanzaremos error
@@ -57,7 +51,7 @@ export class RegistrarLeadUseCase implements CasoDeUso<
         email: input.email,
         telefono: input.telefono,
         tipo: input.tipo,
-        idAsesor: idUsuarioRef(idAsesorFinal),
+        idAsesor: idAsesorFinal,
         idPropiedadInteres: input.idPropiedadInteres,
       });
 
