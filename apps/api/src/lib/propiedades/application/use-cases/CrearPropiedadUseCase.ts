@@ -4,9 +4,8 @@ import {
   resultadoFallido,
   type Resultado,
 } from "../../../shared";
-import { type IPropiedadRepository } from "../../domain/ports";
+import { type IConsultaRelacionPropiedad, type IPropiedadRepository } from "../../domain/ports";
 import { Propiedad } from "../../domain/entities";
-import { idUsuarioRef } from "../../domain/value-objects";
 import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
 import { type IAutorizadorPropiedades } from "../../domain/ports";
 import { PropiedadError } from "../../domain/errors/PropiedadError";
@@ -16,42 +15,50 @@ export type CrearPropiedadInput = {
   titulo: string;
   descripcion: string;
   precio: number;
-  idAsesor: string;
+  origen?: string;
+  estado?: string;
+  idLeadOrigen?: string;
+  idClientePropietario?: string;
+  captadaPorAsesorId?: string;
+  asesorResponsableId?: string;
   usuarioAutenticado: {
     id: string;
     rol: string;
   };
 };
 
-export class CrearPropiedadUseCase implements CasoDeUso<
-  CrearPropiedadInput,
-  Resultado<Propiedad, PropiedadError>
->,
-  ICrearPropiedad
+export class CrearPropiedadUseCase
+  implements CasoDeUso<CrearPropiedadInput, Resultado<Propiedad, PropiedadError>>, ICrearPropiedad
 {
   constructor(
     private readonly propiedadRepository: IPropiedadRepository,
     private readonly generadorId: IGeneradorId,
     private readonly autorizador: IAutorizadorPropiedades,
+    private readonly consultaRelacionPropiedad: IConsultaRelacionPropiedad,
   ) {}
 
   async ejecutar(input: CrearPropiedadInput): Promise<Resultado<Propiedad, PropiedadError>> {
     try {
       const { usuarioAutenticado } = input;
 
-      if (!this.autorizador.puedeAsignarPropiedad(usuarioAutenticado.id, input.idAsesor)) {
+      const puedeCrear = await this.puedeCrear(input);
+      if (!puedeCrear) {
         return resultadoFallido(
-          new PropiedadError("No tienes permisos para asignar esta propiedad.", "SIN_PERMISOS"),
+          new PropiedadError("No tienes permisos para crear esta propiedad.", "SIN_PERMISOS"),
         );
       }
 
-      const idAsesor = idUsuarioRef(input.idAsesor);
       const propiedad = Propiedad.crear({
         id: this.generadorId.generar(),
         titulo: input.titulo,
         descripcion: input.descripcion,
         precio: input.precio,
-        idAsesor,
+        origen: input.origen,
+        estado: input.estado,
+        idLeadOrigen: input.idLeadOrigen,
+        idClientePropietario: input.idClientePropietario,
+        captadaPorAsesorId: input.captadaPorAsesorId,
+        asesorResponsableId: input.asesorResponsableId,
       });
 
       await this.propiedadRepository.guardar(propiedad);
@@ -62,5 +69,20 @@ export class CrearPropiedadUseCase implements CasoDeUso<
       }
       throw error;
     }
+  }
+
+  private async puedeCrear(input: CrearPropiedadInput): Promise<boolean> {
+    if (this.autorizador.puedeGestionarPropiedades(input.usuarioAutenticado.rol)) {
+      return true;
+    }
+
+    if (!this.autorizador.puedeEditarPropiedadRelacionada(input.usuarioAutenticado.rol)) {
+      return false;
+    }
+
+    return this.consultaRelacionPropiedad.asesorGestionaPropiedad(input.usuarioAutenticado.id, {
+      idLeadOrigen: input.idLeadOrigen,
+      idClientePropietario: input.idClientePropietario,
+    });
   }
 }

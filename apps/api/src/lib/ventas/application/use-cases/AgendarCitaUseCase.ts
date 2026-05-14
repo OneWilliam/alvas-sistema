@@ -6,10 +6,12 @@ import {
 } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
+import { type IAutorizadorVentas } from "../../domain/ports/IAutorizadorVentas";
 import { Cita } from "../../domain/entities/Cita";
 import { idLead, idCita } from "../../domain/value-objects/Ids";
 import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
 import { type IAgendarCita } from "../ports/in";
+import { type UsuarioAutenticadoVentas } from "./RegistrarLeadUseCase";
 
 export type AgendarCitaInput = {
   idLead: string;
@@ -17,17 +19,16 @@ export type AgendarCitaInput = {
   fechaInicio: Date;
   duracionMinutos: number;
   observacion?: string;
+  usuarioAutenticado?: UsuarioAutenticadoVentas;
 };
 
-export class AgendarCitaUseCase implements CasoDeUso<
-  AgendarCitaInput,
-  Resultado<void, ErrorDeDominio>
->,
-  IAgendarCita
+export class AgendarCitaUseCase
+  implements CasoDeUso<AgendarCitaInput, Resultado<void, ErrorDeDominio>>, IAgendarCita
 {
   constructor(
     private readonly repository: IVentasRepository,
     private readonly generadorId: IGeneradorId,
+    private readonly autorizador?: IAutorizadorVentas,
   ) {}
 
   async ejecutar(input: AgendarCitaInput): Promise<Resultado<void, ErrorDeDominio>> {
@@ -37,6 +38,22 @@ export class AgendarCitaUseCase implements CasoDeUso<
         return resultadoFallido(
           new ErrorDeDominio("Lead no encontrado", { codigo: "LEAD_NO_ENCONTRADO" }),
         );
+
+      if (
+        input.usuarioAutenticado &&
+        this.autorizador &&
+        !this.autorizador.puedeGestionarLead(
+          input.usuarioAutenticado.rol,
+          input.usuarioAutenticado.id,
+          lead.idAsesor as string,
+        )
+      ) {
+        return resultadoFallido(
+          new ErrorDeDominio("No tienes permisos para gestionar este lead.", {
+            codigo: "SIN_PERMISOS_LEAD",
+          }),
+        );
+      }
 
       const fechaFin = new Date(input.fechaInicio.getTime() + input.duracionMinutos * 60000);
 

@@ -6,24 +6,27 @@ import {
 } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
+import { type IAutorizadorVentas } from "../../domain/ports/IAutorizadorVentas";
 import { Cliente } from "../../domain/entities/Cliente";
 import { idLead, idCliente } from "../../domain/value-objects/Ids";
 import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
 import { type IConvertirLeadACliente } from "../ports/in";
+import { type UsuarioAutenticadoVentas } from "./RegistrarLeadUseCase";
 
 export type ConvertirLeadAClienteInput = {
   idLead: string;
+  usuarioAutenticado?: UsuarioAutenticadoVentas;
 };
 
-export class ConvertirLeadAClienteUseCase implements CasoDeUso<
-  ConvertirLeadAClienteInput,
-  Resultado<Cliente, ErrorDeDominio>
->,
-  IConvertirLeadACliente
+export class ConvertirLeadAClienteUseCase
+  implements
+    CasoDeUso<ConvertirLeadAClienteInput, Resultado<Cliente, ErrorDeDominio>>,
+    IConvertirLeadACliente
 {
   constructor(
     private readonly repository: IVentasRepository,
     private readonly generadorId: IGeneradorId,
+    private readonly autorizador?: IAutorizadorVentas,
   ) {}
 
   async ejecutar(input: ConvertirLeadAClienteInput): Promise<Resultado<Cliente, ErrorDeDominio>> {
@@ -33,6 +36,22 @@ export class ConvertirLeadAClienteUseCase implements CasoDeUso<
         return resultadoFallido(
           new ErrorDeDominio("Lead no encontrado", { codigo: "LEAD_NO_ENCONTRADO" }),
         );
+
+      if (
+        input.usuarioAutenticado &&
+        this.autorizador &&
+        !this.autorizador.puedeGestionarLead(
+          input.usuarioAutenticado.rol,
+          input.usuarioAutenticado.id,
+          lead.idAsesor as string,
+        )
+      ) {
+        return resultadoFallido(
+          new ErrorDeDominio("No tienes permisos para gestionar este lead.", {
+            codigo: "SIN_PERMISOS_LEAD",
+          }),
+        );
+      }
 
       const nuevoIdCliente = idCliente(this.generadorId.generar());
 

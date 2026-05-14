@@ -6,8 +6,10 @@ import {
 } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
+import { type IAutorizadorVentas } from "../../domain/ports/IAutorizadorVentas";
 import { idCita, idLead } from "../../domain/value-objects/Ids";
 import { type IActualizarCita } from "../ports/in";
+import { type UsuarioAutenticadoVentas } from "./RegistrarLeadUseCase";
 
 export type ActualizarCitaInput = {
   idLead: string;
@@ -16,15 +18,16 @@ export type ActualizarCitaInput = {
   duracionMinutos?: number;
   observacion?: string;
   estado?: string;
+  usuarioAutenticado?: UsuarioAutenticadoVentas;
 };
 
-export class ActualizarCitaUseCase implements CasoDeUso<
-  ActualizarCitaInput,
-  Resultado<void, ErrorDeDominio>
->,
-  IActualizarCita
+export class ActualizarCitaUseCase
+  implements CasoDeUso<ActualizarCitaInput, Resultado<void, ErrorDeDominio>>, IActualizarCita
 {
-  constructor(private readonly repository: IVentasRepository) {}
+  constructor(
+    private readonly repository: IVentasRepository,
+    private readonly autorizador?: IAutorizadorVentas,
+  ) {}
 
   async ejecutar(input: ActualizarCitaInput): Promise<Resultado<void, ErrorDeDominio>> {
     try {
@@ -33,6 +36,22 @@ export class ActualizarCitaUseCase implements CasoDeUso<
         return resultadoFallido(
           new ErrorDeDominio("Lead no encontrado", { codigo: "LEAD_NOT_FOUND" }),
         );
+
+      if (
+        input.usuarioAutenticado &&
+        this.autorizador &&
+        !this.autorizador.puedeGestionarLead(
+          input.usuarioAutenticado.rol,
+          input.usuarioAutenticado.id,
+          lead.idAsesor as string,
+        )
+      ) {
+        return resultadoFallido(
+          new ErrorDeDominio("No tienes permisos para gestionar este lead.", {
+            codigo: "SIN_PERMISOS_LEAD",
+          }),
+        );
+      }
 
       if (!lead.obtenerCitaPorId(idCita(input.idCita))) {
         return resultadoFallido(

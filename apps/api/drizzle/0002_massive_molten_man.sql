@@ -14,7 +14,12 @@ CREATE TABLE `propiedades` (
 	`titulo` text NOT NULL,
 	`descripcion` text NOT NULL,
 	`precio` integer NOT NULL,
-	`id_asesor` text NOT NULL,
+	`origen` text DEFAULT 'ALVAS' NOT NULL,
+	`estado` text DEFAULT 'DISPONIBLE' NOT NULL,
+	`id_lead_origen` text,
+	`id_cliente_propietario` text,
+	`captada_por_asesor_id` text,
+	`asesor_responsable_id` text,
 	`creado_en` text NOT NULL,
 	`actualizado_en` text NOT NULL
 );

@@ -11,24 +11,37 @@ import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
 import { type IRegistrarLead } from "../ports/in";
 import { type RegistrarLeadInputDTO } from "../dto/LeadDTOs";
 import { type IEvaluadorAsignacion } from "../../domain/services/EvaluadorAsignacion";
+import { type IAutorizadorVentas } from "../../domain/ports/IAutorizadorVentas";
+import { type IConsultaPropiedadInteres } from "../../domain/ports/IConsultaPropiedadInteres";
 
-export type RegistrarLeadInput = RegistrarLeadInputDTO;
+export type UsuarioAutenticadoVentas = {
+  id: string;
+  rol: string;
+};
 
-export class RegistrarLeadUseCase implements CasoDeUso<
-  RegistrarLeadInput,
-  Resultado<Lead, ErrorDeDominio>
->,
-  IRegistrarLead
+export type RegistrarLeadInput = RegistrarLeadInputDTO & {
+  usuarioAutenticado?: UsuarioAutenticadoVentas;
+};
+
+export class RegistrarLeadUseCase
+  implements CasoDeUso<RegistrarLeadInput, Resultado<Lead, ErrorDeDominio>>, IRegistrarLead
 {
   constructor(
     private readonly repository: IVentasRepository,
     private readonly generadorId: IGeneradorId,
     private readonly evaluarAsignacion: IEvaluadorAsignacion,
+    private readonly autorizador?: IAutorizadorVentas,
+    private readonly consultaPropiedadInteres?: IConsultaPropiedadInteres,
   ) {}
 
   async ejecutar(input: RegistrarLeadInput): Promise<Resultado<Lead, ErrorDeDominio>> {
     try {
       let idAsesorFinal = input.idAsesor;
+
+      if (input.usuarioAutenticado) {
+        const puedeAsignarOtroAsesor = input.usuarioAutenticado.rol === "ADMIN" && !!input.idAsesor;
+        idAsesorFinal = puedeAsignarOtroAsesor ? input.idAsesor : input.usuarioAutenticado.id;
+      }
 
       // Si no se provee asesor, asignar automáticamente
       if (!idAsesorFinal) {
@@ -43,6 +56,27 @@ export class RegistrarLeadUseCase implements CasoDeUso<
             new ErrorDeDominio("No se pudo asignar un asesor automáticamente."),
           );
         }
+      }
+
+      if (
+        input.usuarioAutenticado &&
+        this.autorizador &&
+        !this.autorizador.puedeGestionarLead(
+          input.usuarioAutenticado.rol,
+          input.usuarioAutenticado.id,
+          idAsesorFinal,
+        )
+      ) {
+        return resultadoFallido(
+          new ErrorDeDominio("No tienes permisos para gestionar este lead.", {
+            codigo: "SIN_PERMISOS_LEAD",
+          }),
+        );
+      }
+
+      const validacionPropiedad = await this.validarPropiedadInteres(input);
+      if (!validacionPropiedad.esExito) {
+        return validacionPropiedad;
       }
 
       const lead = Lead.registrar({
@@ -67,5 +101,39 @@ export class RegistrarLeadUseCase implements CasoDeUso<
       if (error instanceof ErrorDeDominio) return resultadoFallido(error);
       throw error;
     }
+  }
+
+  private async validarPropiedadInteres(
+    input: RegistrarLeadInput,
+  ): Promise<Resultado<void, ErrorDeDominio>> {
+    if (!input.idPropiedadInteres) {
+      return resultadoExitoso(undefined);
+    }
+
+    if (input.tipo.trim().toUpperCase() !== "COMPRA") {
+      return resultadoFallido(
+        new ErrorDeDominio("Solo los leads compradores pueden relacionarse con una propiedad.", {
+          codigo: "PROPIEDAD_INTERES_NO_APLICA",
+        }),
+      );
+    }
+
+    if (!this.consultaPropiedadInteres) {
+      return resultadoExitoso(undefined);
+    }
+
+    const disponible = await this.consultaPropiedadInteres.propiedadDisponibleParaCompra(
+      input.idPropiedadInteres,
+    );
+
+    if (!disponible) {
+      return resultadoFallido(
+        new ErrorDeDominio("La propiedad de interes no esta disponible para compradores.", {
+          codigo: "PROPIEDAD_INTERES_NO_DISPONIBLE",
+        }),
+      );
+    }
+
+    return resultadoExitoso(undefined);
   }
 }

@@ -122,11 +122,48 @@
           "notNull": true,
           "autoincrement": false
         },
-        "id_asesor": {
-          "name": "id_asesor",
+        "origen": {
+          "name": "origen",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false,
+          "default": "'ALVAS'"
+        },
+        "estado": {
+          "name": "estado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'DISPONIBLE'"
+        },
+        "id_lead_origen": {
+          "name": "id_lead_origen",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "id_cliente_propietario": {
+          "name": "id_cliente_propietario",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "captada_por_asesor_id": {
+          "name": "captada_por_asesor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "asesor_responsable_id": {
+          "name": "asesor_responsable_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "creado_en": {

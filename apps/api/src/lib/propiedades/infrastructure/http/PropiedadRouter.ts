@@ -22,6 +22,8 @@ export function crearPropiedadRouter(deps: PropiedadRouterDeps) {
   router.use("*", verifySessionMiddleware());
   router.get("/", (c) => controller.listar(c));
   router.post("/", (c) => controller.crear(c));
+  router.put("/:idPropiedad", (c) => controller.actualizar(c));
+  router.delete("/:idPropiedad", (c) => controller.eliminar(c));
 
   return router;
 }

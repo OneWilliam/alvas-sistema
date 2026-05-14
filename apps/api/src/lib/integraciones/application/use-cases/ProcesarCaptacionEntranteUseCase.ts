@@ -7,10 +7,8 @@ import {
 import { ErrorDeDominio } from "../../../shared/domain";
 import { Captacion } from "../../domain";
 import { type IRegistroLeadCaptacion } from "../../domain/ports/IRegistroLeadCaptacion";
-import {
-  type CaptacionEntranteDTO,
-  type CaptacionProcesadaDTO,
-} from "../dto/CaptacionDTOs";
+import { type IRegistroPropiedadCaptacion } from "../../domain/ports/IRegistroPropiedadCaptacion";
+import { type CaptacionEntranteDTO, type CaptacionProcesadaDTO } from "../dto/CaptacionDTOs";
 import { type IProcesarCaptacionEntrante } from "../ports/in";
 
 export class ProcesarCaptacionEntranteUseCase
@@ -18,7 +16,10 @@ export class ProcesarCaptacionEntranteUseCase
     CasoDeUso<CaptacionEntranteDTO, Resultado<CaptacionProcesadaDTO, ErrorDeDominio>>,
     IProcesarCaptacionEntrante
 {
-  constructor(private readonly registroLead: IRegistroLeadCaptacion) {}
+  constructor(
+    private readonly registroLead: IRegistroLeadCaptacion,
+    private readonly registroPropiedad?: IRegistroPropiedadCaptacion,
+  ) {}
 
   async ejecutar(
     input: CaptacionEntranteDTO,
@@ -40,7 +41,24 @@ export class ProcesarCaptacionEntranteUseCase
         return resultadoFallido(resultado.error);
       }
 
-      return resultadoExitoso({ idLead: resultado.valor.id });
+      let idPropiedadPreliminar: string | undefined;
+      if (captacion.tipo === "VENTA" && this.registroPropiedad) {
+        const propiedad = await this.registroPropiedad.registrar({
+          idLeadOrigen: resultado.valor.id,
+          asesorCaptadorId: resultado.valor.idAsesor,
+          nombreContacto: captacion.contacto.nombre,
+          origen: captacion.origen.valor,
+          metadata: captacion.metadata,
+        });
+
+        if (!propiedad.esExito) {
+          return resultadoFallido(propiedad.error);
+        }
+
+        idPropiedadPreliminar = propiedad.valor.id;
+      }
+
+      return resultadoExitoso({ idLead: resultado.valor.id, idPropiedadPreliminar });
     } catch (error) {
       if (error instanceof ErrorDeDominio) {
         return resultadoFallido(error);

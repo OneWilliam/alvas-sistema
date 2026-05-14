@@ -14,5 +14,7 @@ export type RegistroLeadCaptacionInput = Readonly<{
 }>;
 
 export interface IRegistroLeadCaptacion {
-  registrar(input: RegistroLeadCaptacionInput): Promise<Resultado<{ id: string }, ErrorDeDominio>>;
+  registrar(
+    input: RegistroLeadCaptacionInput,
+  ): Promise<Resultado<{ id: string; idAsesor: string }, ErrorDeDominio>>;
 }

@@ -11,7 +11,7 @@ export class RegistroLeadCaptacionVentasAdapter implements IRegistroLeadCaptacio
 
   async registrar(
     input: RegistroLeadCaptacionInput,
-  ): Promise<Resultado<{ id: string }, ErrorDeDominio>> {
+  ): Promise<Resultado<{ id: string; idAsesor: string }, ErrorDeDominio>> {
     const resultado = await this.registrarLead.ejecutar({
       nombre: input.nombre,
       email: input.email ?? `${input.telefono}@contacto.${input.canal.toLowerCase()}.local`,
@@ -25,6 +25,9 @@ export class RegistroLeadCaptacionVentasAdapter implements IRegistroLeadCaptacio
       return resultado;
     }
 
-    return resultadoExitoso({ id: resultado.valor.id as string });
+    return resultadoExitoso({
+      id: resultado.valor.id as string,
+      idAsesor: resultado.valor.idAsesor as string,
+    });
   }
 }

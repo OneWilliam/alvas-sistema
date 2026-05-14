@@ -1,8 +1,8 @@
 import { type Resultado } from "../../../../shared";
 import { type ErrorDeDominio } from "../../../../shared/domain";
 import { type Lead } from "../../../domain/entities/Lead";
-import { type RegistrarLeadInputDTO } from "../../dto/LeadDTOs";
+import { type RegistrarLeadInput } from "../../use-cases/RegistrarLeadUseCase";
 
 export interface IRegistrarLead {
-  ejecutar(input: RegistrarLeadInputDTO): Promise<Resultado<Lead, ErrorDeDominio>>;
+  ejecutar(input: RegistrarLeadInput): Promise<Resultado<Lead, ErrorDeDominio>>;
 }

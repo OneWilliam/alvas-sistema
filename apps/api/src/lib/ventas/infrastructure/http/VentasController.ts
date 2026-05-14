@@ -49,7 +49,13 @@ export class VentasController {
     error: ErrorDeDominio,
     status: 400 | 401 | 403 | 404 | 409 = 400,
   ): Response {
-    return c.json({ success: false, message: error.message, code: error.codigo }, status);
+    const statusFinal =
+      error.codigo === "SIN_PERMISOS_LEAD"
+        ? 403
+        : error.codigo.includes("NOT_FOUND") || error.codigo.includes("NO_ENCONTRADO")
+          ? 404
+          : status;
+    return c.json({ success: false, message: error.message, code: error.codigo }, statusFinal);
   }
 
   async registrarLead(c: ContextoVentas): Promise<Response> {
@@ -60,7 +66,8 @@ export class VentasController {
 
       const resultado = await useCase.ejecutar({
         ...body,
-        idAsesor: body.idAsesor ?? authPayload.idUsuario,
+        idAsesor: authPayload.rol === "ADMIN" ? body.idAsesor : authPayload.idUsuario,
+        usuarioAutenticado: { id: authPayload.idUsuario, rol: authPayload.rol },
       });
 
       if (!resultado.esExito) {
@@ -80,11 +87,13 @@ export class VentasController {
   async agendarCita(c: ContextoVentas): Promise<Response> {
     try {
       const body = await c.req.json<AgendarCitaInputDTO>();
+      const authPayload = c.get("authPayload");
       const useCase = this.deps.crearAgendarCita(c);
 
       const resultado = await useCase.ejecutar({
         ...body,
         fechaInicio: new Date(body.fechaInicio),
+        usuarioAutenticado: { id: authPayload.idUsuario, rol: authPayload.rol },
       });
 
       if (!resultado.esExito) {
@@ -129,8 +138,12 @@ export class VentasController {
   async convertirACliente(c: ContextoVentas): Promise<Response> {
     try {
       const body = await c.req.json<ConvertirLeadInputDTO>();
+      const authPayload = c.get("authPayload");
       const useCase = this.deps.crearConvertirLeadACliente(c);
-      const resultado = await useCase.ejecutar(body);
+      const resultado = await useCase.ejecutar({
+        ...body,
+        usuarioAutenticado: { id: authPayload.idUsuario, rol: authPayload.rol },
+      });
 
       if (!resultado.esExito) {
         return this.jsonDominioFallo(c, resultado.error);
@@ -150,9 +163,14 @@ export class VentasController {
     try {
       const id = c.req.param("id") ?? "";
       const body = await c.req.json<ActualizarLeadBodyDTO>();
+      const authPayload = c.get("authPayload");
       const useCase = this.deps.crearActualizarLead(c);
 
-      const resultado = await useCase.ejecutar({ id, ...body });
+      const resultado = await useCase.ejecutar({
+        id,
+        ...body,
+        usuarioAutenticado: { id: authPayload.idUsuario, rol: authPayload.rol },
+      });
 
       if (!resultado.esExito) {
         return this.jsonDominioFallo(c, resultado.error);
@@ -173,6 +191,7 @@ export class VentasController {
       const idLead = c.req.param("idLead") ?? "";
       const idCita = c.req.param("idCita") ?? "";
       const body = await c.req.json<ActualizarCitaBodyDTO>();
+      const authPayload = c.get("authPayload");
       const useCase = this.deps.crearActualizarCita(c);
 
       const resultado = await useCase.ejecutar({
@@ -180,6 +199,7 @@ export class VentasController {
         idCita,
         ...body,
         fechaInicio: body.fechaInicio ? new Date(body.fechaInicio) : undefined,
+        usuarioAutenticado: { id: authPayload.idUsuario, rol: authPayload.rol },
       });
 
       if (!resultado.esExito) {

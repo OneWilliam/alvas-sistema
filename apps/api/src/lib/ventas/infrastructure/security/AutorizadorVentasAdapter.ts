@@ -5,6 +5,10 @@ export class AutorizadorVentasAdapter implements IAutorizadorVentas {
     return rol === "ADMIN";
   }
 
+  puedeGestionarLead(rol: string, idUsuario: string, idAsesorDelLead: string): boolean {
+    return rol === "ADMIN" || this.esPropietarioDeLead(idUsuario, idAsesorDelLead);
+  }
+
   esPropietarioDeLead(idUsuario: string, idAsesorDelLead: string): boolean {
     return idUsuario === idAsesorDelLead;
   }

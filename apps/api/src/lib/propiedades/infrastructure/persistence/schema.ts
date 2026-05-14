@@ -5,7 +5,12 @@ export const propiedadesTable = sqliteTable("propiedades", {
   titulo: text("titulo").notNull(),
   descripcion: text("descripcion").notNull(),
   precio: integer("precio").notNull(),
-  idAsesor: text("id_asesor").notNull(),
+  origen: text("origen").notNull().default("ALVAS"),
+  estado: text("estado").notNull().default("DISPONIBLE"),
+  idLeadOrigen: text("id_lead_origen"),
+  idClientePropietario: text("id_cliente_propietario"),
+  captadaPorAsesorId: text("captada_por_asesor_id"),
+  asesorResponsableId: text("asesor_responsable_id"),
   creadoEn: text("creado_en").notNull(),
   actualizadoEn: text("actualizado_en").notNull(),
 });

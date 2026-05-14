@@ -18,4 +18,5 @@ export type EntradaWhatsAppWebhookDTO = Readonly<{
 
 export type CaptacionProcesadaDTO = Readonly<{
   idLead: string;
+  idPropiedadPreliminar?: string;
 }>;

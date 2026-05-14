@@ -17,6 +17,7 @@ export interface ActualizarLeadInputDTO {
   email?: string;
   telefono?: string;
   tipo?: string;
+  idPropiedadInteres?: string;
 }
 
 export interface ActualizarLeadBodyDTO {
@@ -24,6 +25,7 @@ export interface ActualizarLeadBodyDTO {
   email?: string;
   telefono?: string;
   tipo?: string;
+  idPropiedadInteres?: string;
 }
 
 export interface CrearContratoInputDTO {

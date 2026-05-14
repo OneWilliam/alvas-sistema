@@ -2,8 +2,11 @@ import { type Context } from "hono";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type D1DatabaseLike, type SessionClaims } from "../../../shared/infrastructure";
 import {
+  type ActualizarPropiedadDTO,
   type CrearPropiedadDTO,
+  type IActualizarPropiedad,
   type ICrearPropiedad,
+  type IEliminarPropiedad,
   type IListarPropiedades,
   type PropiedadRespuestaDTO,
 } from "../../application";
@@ -22,6 +25,8 @@ type ContextoPropiedades = Context<{ Bindings: BindingsPropiedades; Variables: A
 export type PropiedadControllerDeps = Readonly<{
   crearCrearPropiedad: (c: ContextoPropiedades) => ICrearPropiedad;
   crearListarPropiedades: (c: ContextoPropiedades) => IListarPropiedades;
+  crearActualizarPropiedad: (c: ContextoPropiedades) => IActualizarPropiedad;
+  crearEliminarPropiedad: (c: ContextoPropiedades) => IEliminarPropiedad;
 }>;
 
 export class PropiedadController {
@@ -72,7 +77,12 @@ export class PropiedadController {
         titulo: p.titulo,
         descripcion: p.descripcion,
         precio: p.precio,
-        idAsesor: p.idAsesor,
+        origen: p.origen,
+        estado: p.estado,
+        idLeadOrigen: p.idLeadOrigen,
+        idClientePropietario: p.idClientePropietario,
+        captadaPorAsesorId: p.captadaPorAsesorId,
+        asesorResponsableId: p.asesorResponsableId,
       }));
 
       return c.json({
@@ -81,6 +91,58 @@ export class PropiedadController {
       });
     } catch (error) {
       console.error("PropiedadController.listar:", error);
+      return c.json({ success: false, message: "Error interno" }, 500);
+    }
+  }
+
+  async actualizar(c: ContextoPropiedades): Promise<Response> {
+    try {
+      const body = await c.req.json<ActualizarPropiedadDTO>();
+      const authPayload = c.get("authPayload");
+      const useCase = this.deps.crearActualizarPropiedad(c);
+
+      const resultado = await useCase.ejecutar({
+        idPropiedad: c.req.param("idPropiedad") ?? "",
+        ...body,
+        usuarioAutenticado: { id: authPayload.idUsuario, rol: authPayload.rol },
+      });
+
+      if (!resultado.esExito) {
+        const err = resultado.error as ErrorDeDominio;
+        return c.json(
+          { success: false, message: err.message, code: err.codigo },
+          err.codigo === "NO_ENCONTRADA" ? 404 : 403,
+        );
+      }
+
+      return c.json({ success: true, message: "Propiedad actualizada" });
+    } catch (error) {
+      console.error("PropiedadController.actualizar:", error);
+      return c.json({ success: false, message: "Error interno" }, 500);
+    }
+  }
+
+  async eliminar(c: ContextoPropiedades): Promise<Response> {
+    try {
+      const authPayload = c.get("authPayload");
+      const useCase = this.deps.crearEliminarPropiedad(c);
+
+      const resultado = await useCase.ejecutar({
+        idPropiedad: c.req.param("idPropiedad") ?? "",
+        usuarioAutenticado: { id: authPayload.idUsuario, rol: authPayload.rol },
+      });
+
+      if (!resultado.esExito) {
+        const err = resultado.error as ErrorDeDominio;
+        return c.json(
+          { success: false, message: err.message, code: err.codigo },
+          err.codigo === "NO_ENCONTRADA" ? 404 : 403,
+        );
+      }
+
+      return c.json({ success: true, message: "Propiedad eliminada" });
+    } catch (error) {
+      console.error("PropiedadController.eliminar:", error);
       return c.json({ success: false, message: "Error interno" }, 500);
     }
   }
