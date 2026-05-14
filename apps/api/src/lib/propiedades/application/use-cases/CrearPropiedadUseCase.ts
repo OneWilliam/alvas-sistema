@@ -39,8 +39,6 @@ export class CrearPropiedadUseCase
 
   async ejecutar(input: CrearPropiedadInput): Promise<Resultado<Propiedad, PropiedadError>> {
     try {
-      const { usuarioAutenticado } = input;
-
       const puedeCrear = await this.puedeCrear(input);
       if (!puedeCrear) {
         return resultadoFallido(
