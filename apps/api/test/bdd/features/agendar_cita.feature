@@ -6,8 +6,7 @@ Feature: Agendar Cita
   Scenario: Agendar cita exitosamente
     Given un lead registrado en estado "NUEVO"
     When el asesor agenda una cita para el "2026-06-01" de "60" minutos
-    Then la cita se agrega al lead
-    And el estado de la cita es "PENDIENTE"
+    Then la cita queda agregada al lead con estado "PENDIENTE"
 
   Scenario: Fallo al agendar cita en lead cerrado
     Given un lead registrado en estado "PERDIDO"

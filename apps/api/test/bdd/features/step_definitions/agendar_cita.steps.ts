@@ -130,12 +130,9 @@ When(
   },
 );
 
-Then("la cita se agrega al lead", function () {
+Then("la cita queda agregada al lead con estado {string}", function (estadoEsperado: string) {
   assert.strictEqual(resultadoAgenda.esExito, true);
   assert.strictEqual(lead.citas.length, 1);
-});
-
-Then("el estado de la cita es {string}", function (estadoEsperado: string) {
   assert.strictEqual(lead.citas[0]?.estado, estadoEsperado);
 });
 

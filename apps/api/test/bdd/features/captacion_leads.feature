@@ -11,5 +11,4 @@ Feature: Captación de Leads
   Scenario: Registro exitoso de un lead calificado
     Given que el negocio tiene asesores disponibles
     When un nuevo prospecto "Maria" con correo "maria@example.com" solicita informacion sobre ventas
-    Then el sistema lo registra como un nuevo lead
-    And el estado inicial del lead es "NUEVO"
+    Then el sistema lo registra como un nuevo lead en estado "NUEVO"
