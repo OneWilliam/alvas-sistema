@@ -36,7 +36,7 @@ Pasa
 
 ## Lectura de la Cobertura
 
-`bun test --coverage` reporta cobertura sobre los módulos cargados por la suite. Por eso la métrica no debe interpretarse como cobertura total de todo el backend, sino como cobertura del núcleo de dominio y aplicación seleccionado para el blindaje de Semana 05.
+`bun test --coverage` reporta cobertura sobre los módulos cargados por la suite. Por eso la métrica no debe interpretarse como cobertura total de todo el backend, sino como cobertura del núcleo de dominio y aplicación seleccionado para el blindaje.
 
 ## Evidencia Esperada
 
