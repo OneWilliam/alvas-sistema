@@ -14,6 +14,8 @@ describe("auth / Sesion", () => {
 
     expect(sesion.authToken).toBe("auth-token");
     expect(sesion.refreshToken).toBe("refresh-token");
+    expect(sesion.idUsuario).toBe("user-001");
+    expect(sesion.username).toBe("asesor1");
     expect(sesion.rol).toBe("ASESOR");
   });
 });
