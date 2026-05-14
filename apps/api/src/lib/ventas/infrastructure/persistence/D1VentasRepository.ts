@@ -47,32 +47,19 @@ export class D1VentasRepository implements IVentasRepository {
   async guardarLead(lead: Lead): Promise<void> {
     const leadValues = VentasMapper.leadAPersistencia(lead);
 
-    // Batch de operaciones para atomicidad en D1
-    const ops: unknown[] = [
-      this.drizzle().insert(leadsTable).values(leadValues).onConflictDoUpdate({
-        target: leadsTable.id,
-        set: leadValues,
-      }),
-    ];
+    await this.drizzle().insert(leadsTable).values(leadValues).onConflictDoUpdate({
+      target: leadsTable.id,
+      set: leadValues,
+    });
 
-    // Sincronizar Citas
-    ops.push(
-      this.drizzle()
-        .delete(citasVentasTable)
-        .where(eq(citasVentasTable.idLead, lead.id as string)),
-    );
+    await this.drizzle()
+      .delete(citasVentasTable)
+      .where(eq(citasVentasTable.idLead, lead.id as string));
 
     if (lead.citas.length > 0) {
       const citasValues = lead.citas.map(VentasMapper.citaAPersistencia);
-      citasValues.forEach((val) => {
-        ops.push(this.drizzle().insert(citasVentasTable).values(val));
-      });
+      await this.drizzle().insert(citasVentasTable).values(citasValues);
     }
-
-    if (typeof this.db.batch !== "function") {
-      throw new Error("D1DatabaseLike.batch no esta disponible en este entorno.");
-    }
-    await this.db.batch(ops);
   }
 
   async listarLeads(): Promise<Lead[]> {
