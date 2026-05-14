@@ -10,6 +10,7 @@ bun --cwd apps/api test:bdd
 
 ## Alcance Cubierto
 
+- Tests unitarios organizados por contexto en `apps/api/test/unit/{auth,usuarios,ventas,integraciones,reportes}`.
 - Value Objects de `usuarios`, `auth`, `ventas`, `integraciones` y `reportes`.
 - Entidades/agregados: `Usuario`, `Sesion`, `Lead`, `Cita`, `Contrato`, `Captacion`.
 - Servicio de dominio: `EvaluadorAsignacionService`.
@@ -23,7 +24,8 @@ bun test --coverage
 29 pass
 0 fail
 77 expect() calls
-All files: 86.20% funcs, 91.66% lines
+15 test files
+All files: 86.72% funcs, 91.98% lines
 
 bun --cwd apps/api test:bdd
 6 scenarios passed

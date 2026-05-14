@@ -3,7 +3,7 @@ import { describe, expect, test } from "bun:test";
 import { idUsuarioRef } from "../../../src/lib/shared/domain/value-objects/IdUsuarioRef";
 import { EvaluadorAsignacionService } from "../../../src/lib/ventas/domain/services/EvaluadorAsignacion";
 
-describe("Servicio de dominio: EvaluadorAsignacionService", () => {
+describe("ventas / EvaluadorAsignacionService", () => {
   test("elige el asesor con menor carga de leads", () => {
     const evaluador = new EvaluadorAsignacionService();
     const resultado = evaluador.evaluar([

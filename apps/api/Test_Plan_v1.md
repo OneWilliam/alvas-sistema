@@ -16,8 +16,11 @@ En esta iteración (v1.0), el foco está en la **Pirámide de Pruebas**, concent
 ```text
 apps/api/test/
   unit/
-    application/
-    domain/
+    auth/
+    integraciones/
+    reportes/
+    usuarios/
+    ventas/
   bdd/
     features/
       step_definitions/
